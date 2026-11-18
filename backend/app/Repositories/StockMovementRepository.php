@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\StockMovement;
+use Illuminate\Database\Eloquent\Collection;
 
 class StockMovementRepository
 {
@@ -14,5 +15,20 @@ class StockMovementRepository
     public function create(array $attributes): StockMovement
     {
         return StockMovement::query()->create($attributes);
+    }
+
+    /**
+     * Get the movement history of one item, newest first.
+     *
+     * @return Collection<int, StockMovement>
+     */
+    public function listByItem(int $itemId): Collection
+    {
+        return StockMovement::query()
+            ->with(['user:id,name'])
+            ->where('item_id', $itemId)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->get();
     }
 }

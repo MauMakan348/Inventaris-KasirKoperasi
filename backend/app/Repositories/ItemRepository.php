@@ -4,6 +4,8 @@ namespace App\Repositories;
 
 use App\Models\Item;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
+use LogicException;
 
 class ItemRepository
 {
@@ -18,6 +20,31 @@ class ItemRepository
             ->orderBy('name')
             ->orderBy('id')
             ->get();
+    }
+
+    /**
+     * Lock the given item rows ordered by ascending id.
+     *
+     * The ascending order is mandatory: two overlapping transactions always
+     * request the same row order, which prevents circular waits (deadlocks).
+     * A transaction must already be open, otherwise the lock would be
+     * released immediately and the check-then-act race would return.
+     *
+     * @param  list<int>  $ids
+     * @return Collection<int, Item>
+     */
+    public function lockItemsForUpdate(array $ids): Collection
+    {
+        if (DB::transactionLevel() === 0) {
+            throw new LogicException('lockItemsForUpdate must be called inside a database transaction.');
+        }
+
+        return Item::query()
+            ->whereKey($ids)
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get()
+            ->keyBy('id');
     }
 
     /**

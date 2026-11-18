@@ -55,12 +55,12 @@
 
 ## Fase 5. Stok (Restock & Opname)
 
-- [ ] Buat `StockMovementRepository`.
-- [ ] Tambahkan `lockItemsForUpdate(array $ids)` di `ItemRepository` (`ORDER BY id FOR UPDATE`).
-- [ ] Buat `StockService::restock()` dalam `DB::transaction` dengan kunci baris dan pencatatan mutasi.
-- [ ] Buat `StockService::opname()` dalam `DB::transaction` dengan kunci baris dan pencatatan selisih.
-- [ ] Implementasikan `POST /api/items/{id}/restock`, `POST /api/items/{id}/stock-opname`, `GET /api/items/{id}/movements` (ADMIN).
-- [ ] Tes: restock valid, kuantitas <= 0, opname naik/turun, opname negatif ditolak, mutasi tercatat benar, akses non-admin.
+- [x] Buat `StockMovementRepository`.
+- [x] Tambahkan `lockItemsForUpdate(array $ids)` di `ItemRepository` (`ORDER BY id FOR UPDATE`).
+- [x] Buat `StockService::restock()` dalam `DB::transaction` dengan kunci baris dan pencatatan mutasi.
+- [x] Buat `StockService::opname()` dalam `DB::transaction` dengan kunci baris dan pencatatan selisih.
+- [x] Implementasikan `POST /api/items/{id}/restock`, `POST /api/items/{id}/stock-opname`, `GET /api/items/{id}/movements` (ADMIN).
+- [x] Tes: restock valid, kuantitas <= 0, opname naik/turun, opname negatif ditolak, mutasi tercatat benar, akses non-admin.
 
 ## Fase 6. Checkout Multi-Item (The 30% Hard Problem)
 

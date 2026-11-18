@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ItemController;
+use App\Http\Controllers\Api\StockController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/register', [AuthController::class, 'register']);
@@ -17,5 +18,9 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::middleware('role:ADMIN')->group(function (): void {
         Route::post('/items', [ItemController::class, 'store']);
         Route::put('/items/{id}', [ItemController::class, 'update'])->whereNumber('id');
+
+        Route::post('/items/{id}/restock', [StockController::class, 'restock'])->whereNumber('id');
+        Route::post('/items/{id}/stock-opname', [StockController::class, 'opname'])->whereNumber('id');
+        Route::get('/items/{id}/movements', [StockController::class, 'movements'])->whereNumber('id');
     });
 });
