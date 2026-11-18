@@ -24,15 +24,15 @@
 
 - [ ] Buat Enum: `Role`, `OrderChannel`, `PaymentMethod`, `StockMovementType`.
 - [x] Migrasi `users` (tambah kolom `role` dengan CHECK).
-- [ ] Migrasi `items` (UNIQUE sku, CHECK `price > 0`, **CHECK `stock >= 0`**).
+- [x] Migrasi `items` (UNIQUE sku, CHECK `price > 0`, **CHECK `stock >= 0`**).
 - [ ] Migrasi `orders` (UNIQUE `order_code`, CHECK channel/status/payment_method, FK).
 - [ ] Migrasi `order_items` (CHECK `quantity > 0`, FK RESTRICT).
 - [ ] Migrasi `stock_movements` (CHECK type, quantity_change, stock_before/after).
 - [ ] Tambahkan indeks sesuai `ARCHITECTURE.md` bagian 5.
 - [ ] Buat Model dan relasi: `User`, `Item`, `Order`, `OrderItem`, `StockMovement` (dengan `$fillable` yang aman).
 - [ ] Buat Factory untuk model utama.
-- [ ] Buat Seeder: 1 ADMIN, 2 CASHIER, 2 MEMBER, dan sekitar 10 barang dengan stok awal. Password demo dibaca dari env.
-- [ ] Verifikasi: migrasi dan seeder berjalan bersih. Uji manual bahwa insert stok negatif ditolak oleh database.
+- [x] Buat Seeder: 1 ADMIN, 2 CASHIER, 2 MEMBER, dan sekitar 10 barang dengan stok awal. Password demo dibaca dari env.
+- [x] Verifikasi: migrasi dan seeder berjalan bersih. Uji manual bahwa insert stok negatif ditolak oleh database.
 
 ## Fase 3. Autentikasi & Otorisasi
 
