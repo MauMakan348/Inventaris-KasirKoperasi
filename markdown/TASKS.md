@@ -36,13 +36,13 @@
 
 ## Fase 3. Autentikasi & Otorisasi
 
-- [ ] Buat `AuthService`, `AuthController`, dan Form Request untuk register dan login.
-- [ ] Implementasikan `POST /api/auth/register` (role dipaksa `MEMBER`).
-- [ ] Implementasikan `POST /api/auth/login` dengan pesan error generik dan rate limit.
-- [ ] Implementasikan `POST /api/auth/logout` dan `GET /api/auth/me`.
-- [ ] Buat middleware `EnsureRole` dan daftarkan.
-- [ ] Buat penanganan error global ke format `{ "error": { "code", "message" } }` (401, 403, 404, 422, 500).
-- [ ] Tes: register, login sukses/gagal, akses tanpa token, akses dengan role salah.
+- [x] Buat `AuthService`, `AuthController`, dan Form Request untuk register dan login.
+- [x] Implementasikan `POST /api/auth/register` (role dipaksa `MEMBER`).
+- [x] Implementasikan `POST /api/auth/login` dengan pesan error generik dan rate limit.
+- [x] Implementasikan `POST /api/auth/logout` dan `GET /api/auth/me`.
+- [x] Buat middleware `EnsureRole` dan daftarkan.
+- [x] Buat penanganan error global ke format `{ "error": { "code", "message" } }` (401, 403, 404, 422, 500).
+- [x] Tes: register, login sukses/gagal, akses tanpa token, akses dengan role salah.
 
 ## Fase 4. Master Barang
 
