@@ -46,12 +46,12 @@
 
 ## Fase 4. Master Barang
 
-- [ ] Buat `ItemRepository` (list, find, create, update).
-- [ ] Buat `ItemService` (validasi bisnis, SKU unik).
-- [ ] Buat Form Request dan `ItemResource`.
-- [ ] Implementasikan `GET /api/items` dan `GET /api/items/{id}` (semua role).
-- [ ] Implementasikan `POST /api/items` dan `PUT /api/items/{id}` (ADMIN). `PUT` tidak boleh mengubah stok.
-- [ ] Tes: daftar kosong, tambah valid, SKU duplikat, harga <= 0, stok negatif, akses non-admin.
+- [x] Buat `ItemRepository` (list, find, create, update).
+- [x] Buat `ItemService` (validasi bisnis, SKU unik).
+- [x] Buat Form Request dan `ItemResource`.
+- [x] Implementasikan `GET /api/items` dan `GET /api/items/{id}` (semua role).
+- [x] Implementasikan `POST /api/items` dan `PUT /api/items/{id}` (ADMIN). `PUT` tidak boleh mengubah stok.
+- [x] Tes: daftar kosong, tambah valid, SKU duplikat, harga <= 0, stok negatif, akses non-admin.
 
 ## Fase 5. Stok (Restock & Opname)
 
