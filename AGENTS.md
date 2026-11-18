@@ -11,6 +11,7 @@ Dokumen konteks ada di folder `markdown/`:
 3. `markdown/ARCHITECTURE.md`: arsitektur berlapis dan alur checkout All-or-Nothing.
 4. `markdown/RULES.md`: aturan kode, ACID, keamanan, pengujian. **Prioritas tertinggi.**
 5. `markdown/TASKS.md`: daftar tugas berurutan. Kerjakan sesuai urutan.
+6. `ketentuan.md`: instruksi rinci untuk fase yang sedang dikerjakan (ditimpa setiap ganti fase). Jika bertentangan dengan dokumen di `markdown/`, hentikan dan tanyakan dulu.
 
 ## Ringkasan aturan penting
 

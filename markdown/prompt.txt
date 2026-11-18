@@ -2,3 +2,6 @@ Baca AGENTS.md dan semua dokumen di markdown/ tanpa membuat code apapun
 sekarang selesaikan fase 1, lalu berhenti dan laporkan hasilnya
 Pasang ekstensi pdo_pgsql di host sudah saya lakukan. Jangan memakai modul sementara di /tmp. Verifikasi dengan perintah Laravel normal
 Baca AGENTS.md dan semua dokumen di markdown/ (REQUIREMENTS.md bagian 5.1, 7, 8; PRD.md bagian 3.6; ARCHITECTURE.md bagian 7 dan 8; RULES.md; ketentuan.md). Kerjakan Fase 3 di markdown/TASKS.md (Autentikasi & Otorisasi)
+Baca AGENTS.md dan semua dokumen di markdown/ (REQUIREMENTS.md bagian 4.2, 5.2,7, 8; PRD.md bagian 3.4; ARCHITECTURE.md; RULES.md; ketentuan.md). Kerjakan HANYA Fase 4 di markdown/TASKS.md (Master Barang), berurutan.
+Baca AGENTS.md, semua dokumen di markdown/, dan ketentuan.md. Kerjakan HANYA Fase 5 di markdown/TASKS.md (Stok: Restock & Opname), berurutan, dengan mengikuti ketentuan.md. Jangan mengerjakan Fase 6. Jika ketentuan.md bertentangan dengan dokumen di markdown/, hentikan dan tanyakan dulu.
+Baca AGENTS.md, semua dokumen di markdown/, dan markdown/ketentuan.md. Kerjakan HANYA Fase 6 di markdown/TASKS.md (Checkout Multi-Item), berurutan, dengan mengikuti ketentuan.md. Jangan mengerjakan Fase 7. Jika ketentuan.md bertentangan dengan dokumen di markdown/, hentikan dan tanyakan dulu.
