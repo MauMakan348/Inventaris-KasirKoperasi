@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Item;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -39,26 +38,6 @@ class DatabaseSeeder extends Seeder
             $user->save();
         }
 
-        $items = [
-            ['SKU-001', 'Buku Tulis', 5000, 40],
-            ['SKU-002', 'Pulpen Hitam', 3000, 60],
-            ['SKU-003', 'Pensil 2B', 2500, 50],
-            ['SKU-004', 'Penghapus Putih', 2000, 35],
-            ['SKU-005', 'Penggaris 30cm', 7000, 25],
-            ['SKU-006', 'Map Plastik', 4500, 30],
-            ['SKU-007', 'Kertas A4', 55000, 15],
-            ['SKU-008', 'Spidol Permanen', 8500, 20],
-            ['SKU-009', 'Stapler Mini', 18000, 12],
-            ['SKU-010', 'Isi Stapler', 6000, 28],
-        ];
-
-        foreach ($items as [$sku, $name, $price, $stock]) {
-            $item = new Item;
-            $item->sku = $sku;
-            $item->name = $name;
-            $item->price = $price;
-            $item->stock = $stock;
-            $item->save();
-        }
+        $this->call(ItemSeeder::class);
     }
 }
