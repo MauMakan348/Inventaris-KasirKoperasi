@@ -8,10 +8,10 @@
 - **BR-04** Harga dan total dihitung oleh server dari data database. Nilai harga atau total dari klien diabaikan.
 - **BR-05** Harga yang berlaku saat transaksi disimpan sebagai snapshot di `order_items`, sehingga perubahan harga di kemudian hari tidak mengubah riwayat.
 - **BR-06** Jika keranjang memuat `item_id` yang sama lebih dari sekali, kuantitasnya digabung sebelum divalidasi.
-- **BR-07** Setiap perubahan stok (penjualan, restock, opname) wajib tercatat di `stock_movements` dalam transaksi yang sama.
-- **BR-08** Untuk pembayaran `CASH` di POS, `amount_paid` harus >= `total_amount`. Kembalian dihitung server.
+- **BR-07** Setiap perubahan stok (penjualan, restock, opname) wajib tercatat di `stock_movements` dalam transaksi yang sama. Invarian: stok setiap barang = jumlah seluruh `quantity_change` mutasinya.
+- **BR-08** Pembayaran `TRANSFER` (POS maupun ONLINE) menyimpan `amount_paid = total_amount` dan `change_amount = 0`; nilai dari klien diabaikan. `ONLINE` hanya menerima `TRANSFER`. Untuk `POS` dengan `CASH`, `amount_paid` wajib dan harus >= `total_amount`; kembalian dihitung server.
 - **BR-09** Pemesanan online langsung mengurangi stok saat berhasil dibuat (tanpa reservasi atau batas waktu bayar). Status transaksi langsung `COMPLETED`.
-- **BR-10** Restock hanya menerima kuantitas positif. Stock opname menetapkan stok sama dengan jumlah fisik (>= 0) dan mencatat selisihnya.
+- **BR-10** Restock hanya menerima kuantitas positif. Stock opname menetapkan stok sama dengan jumlah fisik (>= 0) dan mencatat selisihnya. Invarian: stok setiap barang = jumlah seluruh `quantity_change` mutasinya.
 - **BR-11** Anggota hanya dapat melihat transaksi miliknya sendiri.
 
 ## 2. User Stories

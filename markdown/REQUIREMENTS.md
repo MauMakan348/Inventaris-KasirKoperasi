@@ -53,7 +53,7 @@ Semua nilai uang disimpan sebagai **bilangan bulat Rupiah** (tanpa desimal). Sem
 | Kolom | Tipe | Aturan |
 |---|---|---|
 | id | BIGINT, PK | |
-| order_code | VARCHAR(30) | Unik, dibuat server |
+| order_code | VARCHAR(30) | Unik, dibuat server. Format `KOP-YYYYMMDD-XXXXXXXX`, tanggal memakai zona waktu bisnis (`BUSINESS_TIMEZONE`) |
 | user_id | BIGINT, FK -> users.id | Kasir (POS) atau anggota (ONLINE) pembuat transaksi |
 | channel | VARCHAR(10) | CHECK: `POS`, `ONLINE` |
 | status | VARCHAR(15) | CHECK: `COMPLETED` |
@@ -62,6 +62,12 @@ Semua nilai uang disimpan sebagai **bilangan bulat Rupiah** (tanpa desimal). Sem
 | amount_paid | BIGINT | Nullable. Wajib untuk `CASH` di POS |
 | change_amount | BIGINT | Nullable. `amount_paid - total_amount` |
 | created_at, updated_at | TIMESTAMP | |
+
+Aturan pembayaran:
+
+- `ONLINE` hanya menerima `TRANSFER`. `CASH` pada pesanan online ditolak 422.
+- `POS` dengan `CASH` wajib mengirim `amount_paid`; nilai harus `>= total_amount`.
+- `TRANSFER` (POS maupun ONLINE) mengabaikan `amount_paid` dari klien; server menyimpan `amount_paid = total_amount` dan `change_amount = 0`.
 
 ### 4.4 order_items
 | Kolom | Tipe | Aturan |
@@ -87,6 +93,8 @@ Semua nilai uang disimpan sebagai **bilangan bulat Rupiah** (tanpa desimal). Sem
 | stock_after | INTEGER | CHECK `>= 0` |
 | note | TEXT | Nullable |
 | created_at | TIMESTAMP | |
+
+Stok awal barang baru yang lebih dari 0 dicatat sebagai mutasi `RESTOCK` dengan `quantity_change` = stok awal, `stock_before` = 0, `stock_after` = stok awal, dan note `"Stok awal"`.
 
 ### 4.6 Relasi
 ```text
@@ -118,8 +126,8 @@ Prefix seluruh endpoint: `/api`. Kolom "Akses" menunjukkan role yang diizinkan.
 ### 5.3 Stok
 | Method | Endpoint | Akses | Fungsi |
 |---|---|---|---|
-| POST | `/items/{id}/restock` | ADMIN | Menambah stok masuk |
-| POST | `/items/{id}/stock-opname` | ADMIN | Menyesuaikan stok ke jumlah fisik hasil hitung |
+| POST | `/items/{id}/restock` | ADMIN | Menambah stok masuk. Respons `{item, movement}` |
+| POST | `/items/{id}/stock-opname` | ADMIN | Menyesuaikan stok ke jumlah fisik hasil hitung. Respons `{item, movement}`; selisih 0 tidak menulis mutasi dan `movement` bernilai `null` |
 | GET | `/items/{id}/movements` | ADMIN | Riwayat mutasi stok barang |
 
 ### 5.4 Transaksi
@@ -175,6 +183,30 @@ Error:
     "details": [
       { "item_id": 4, "name": "Buku Tulis", "requested": 3, "available": 1 }
     ]
+  }
+}
+```
+
+`details` pada 409 `INSUFFICIENT_STOCK` memuat **semua** barang yang stoknya kurang, bukan hanya yang pertama gagal.
+
+Uang bayar kurang (422):
+```json
+{
+  "error": {
+    "code": "INSUFFICIENT_PAYMENT",
+    "message": "Jumlah pembayaran kurang dari total transaksi.",
+    "details": { "total_amount": 13000, "amount_paid": 10000 }
+  }
+}
+```
+
+Barang tidak ditemukan saat checkout (404):
+```json
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Barang tidak ditemukan.",
+    "details": { "item_ids": [4, 9] }
   }
 }
 ```
