@@ -23,7 +23,7 @@
 ## Fase 2. Database & Model
 
 - [ ] Buat Enum: `Role`, `OrderChannel`, `PaymentMethod`, `StockMovementType`.
-- [ ] Migrasi `users` (tambah kolom `role` dengan CHECK).
+- [x] Migrasi `users` (tambah kolom `role` dengan CHECK).
 - [ ] Migrasi `items` (UNIQUE sku, CHECK `price > 0`, **CHECK `stock >= 0`**).
 - [ ] Migrasi `orders` (UNIQUE `order_code`, CHECK channel/status/payment_method, FK).
 - [ ] Migrasi `order_items` (CHECK `quantity > 0`, FK RESTRICT).
