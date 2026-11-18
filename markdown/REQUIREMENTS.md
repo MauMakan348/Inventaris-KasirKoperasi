@@ -189,4 +189,5 @@ Error:
 | Barang / transaksi tidak ditemukan | 404 | `NOT_FOUND` |
 | Stok tidak mencukupi | 409 | `INSUFFICIENT_STOCK` |
 | Uang bayar kurang (CASH) | 422 | `INSUFFICIENT_PAYMENT` |
+| Login melebihi batas percobaan | 429 | `RATE_LIMITED` |
 | Kesalahan server tak terduga | 500 | `INTERNAL_ERROR` (tanpa detail internal) |

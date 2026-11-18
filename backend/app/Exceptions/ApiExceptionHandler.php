@@ -61,7 +61,6 @@ class ApiExceptionHandler
                 'INTERNAL_ERROR',
                 'Terjadi kesalahan pada server.',
                 500,
-                config('app.debug') ? ['exception' => $exception->getMessage()] : null,
             ),
         };
     }
