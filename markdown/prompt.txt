@@ -1,0 +1,2 @@
+Baca AGENTS.md dan semua dokumen di markdown/ tanpa membuat code apapun
+sekarang selesaikan fase 1, lalu berhenti dan laporkan hasilnya
