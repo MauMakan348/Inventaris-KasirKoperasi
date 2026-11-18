@@ -22,15 +22,15 @@
 
 ## Fase 2. Database & Model
 
-- [ ] Buat Enum: `Role`, `OrderChannel`, `PaymentMethod`, `StockMovementType`.
+- [x] Buat Enum: `Role`, `OrderChannel`, `PaymentMethod`, `StockMovementType`.
 - [x] Migrasi `users` (tambah kolom `role` dengan CHECK).
 - [x] Migrasi `items` (UNIQUE sku, CHECK `price > 0`, **CHECK `stock >= 0`**).
-- [ ] Migrasi `orders` (UNIQUE `order_code`, CHECK channel/status/payment_method, FK).
-- [ ] Migrasi `order_items` (CHECK `quantity > 0`, FK RESTRICT).
-- [ ] Migrasi `stock_movements` (CHECK type, quantity_change, stock_before/after).
-- [ ] Tambahkan indeks sesuai `ARCHITECTURE.md` bagian 5.
-- [ ] Buat Model dan relasi: `User`, `Item`, `Order`, `OrderItem`, `StockMovement` (dengan `$fillable` yang aman).
-- [ ] Buat Factory untuk model utama.
+- [x] Migrasi `orders` (UNIQUE `order_code`, CHECK channel/status/payment_method, FK).
+- [x] Migrasi `order_items` (CHECK `quantity > 0`, FK RESTRICT).
+- [x] Migrasi `stock_movements` (CHECK type, quantity_change, stock_before/after).
+- [x] Tambahkan indeks sesuai `ARCHITECTURE.md` bagian 5.
+- [x] Buat Model dan relasi: `User`, `Item`, `Order`, `OrderItem`, `StockMovement` (dengan `$fillable` yang aman).
+- [x] Buat Factory untuk model utama.
 - [x] Buat Seeder: 1 ADMIN, 2 CASHIER, 2 MEMBER, dan sekitar 10 barang dengan stok awal. Password demo dibaca dari env.
 - [x] Verifikasi: migrasi dan seeder berjalan bersih. Uji manual bahwa insert stok negatif ditolak oleh database.
 
