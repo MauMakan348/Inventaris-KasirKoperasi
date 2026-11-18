@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ItemController;
+use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\StockController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,4 +24,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('/items/{id}/stock-opname', [StockController::class, 'opname'])->whereNumber('id');
         Route::get('/items/{id}/movements', [StockController::class, 'movements'])->whereNumber('id');
     });
+
+    Route::post('/orders', [OrderController::class, 'store'])->middleware('role:CASHIER,MEMBER');
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::get('/orders/{id}', [OrderController::class, 'show'])->whereNumber('id');
 });

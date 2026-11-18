@@ -64,26 +64,26 @@
 
 ## Fase 6. Checkout Multi-Item (The 30% Hard Problem)
 
-- [ ] Buat `InsufficientStockException` (membawa daftar barang bermasalah) dan `InsufficientPaymentException`. Petakan ke 409 dan 422.
-- [ ] Buat `OrderRepository` (create order, create order items) dan generator `order_code` unik.
-- [ ] Buat `CheckoutRequest` (keranjang 1..50 baris, quantity integer 1..1000, payment_method valid).
-- [ ] Buat `OrderService::checkout()` mengikuti `ARCHITECTURE.md` bagian 6.1:
-  - [ ] Gabungkan item duplikat dan urutkan `item_id` menaik.
-  - [ ] Buka `DB::transaction($callback, 3)`.
-  - [ ] Kunci baris item dengan `FOR UPDATE` secara berurutan.
-  - [ ] Tangani `item_id` tidak ditemukan (404) tanpa perubahan data.
-  - [ ] Kumpulkan **semua** barang yang stoknya kurang lalu lempar `InsufficientStockException`.
-  - [ ] Hitung harga, subtotal, total dari database (abaikan input harga klien).
-  - [ ] Validasi pembayaran CASH untuk POS dan hitung kembalian.
-  - [ ] Buat order dan order items (dengan snapshot nama dan harga).
-  - [ ] Kurangi stok dan tulis `stock_movements` (`SALE_POS` / `SALE_ONLINE`).
-- [ ] Implementasikan `POST /api/orders` (CASHIER, MEMBER). Channel ditentukan dari role. ADMIN ditolak 403.
-- [ ] Implementasikan `GET /api/orders` dan `GET /api/orders/{id}` dengan pembatasan kepemilikan untuk MEMBER.
-- [ ] Tes dasar: checkout POS valid, checkout ONLINE valid, keranjang kosong, quantity tidak valid, item tidak ada, uang kurang, harga palsu diabaikan.
-- [ ] Tes HP-01: 5 barang, barang ke-4 habis -> 409, **semua stok dan jumlah baris tabel terkait tidak berubah**.
-- [ ] Tes HP-05: item duplikat digabung lalu ditolak jika stok kurang.
-- [ ] Tes HP-07: paksa kegagalan setelah beberapa barang diproses -> rollback penuh.
-- [ ] Verifikasi manual di PostgreSQL bahwa constraint `stock >= 0` tetap aktif.
+- [x] Buat `InsufficientStockException` (membawa daftar barang bermasalah) dan `InsufficientPaymentException`. Petakan ke 409 dan 422.
+- [x] Buat `OrderRepository` (create order, create order items) dan generator `order_code` unik.
+- [x] Buat `CheckoutRequest` (keranjang 1..50 baris, quantity integer 1..1000, payment_method valid).
+- [x] Buat `OrderService::checkout()` mengikuti `ARCHITECTURE.md` bagian 6.1:
+  - [x] Gabungkan item duplikat dan urutkan `item_id` menaik.
+  - [x] Buka `DB::transaction($callback, 3)`.
+  - [x] Kunci baris item dengan `FOR UPDATE` secara berurutan.
+  - [x] Tangani `item_id` tidak ditemukan (404) tanpa perubahan data.
+  - [x] Kumpulkan **semua** barang yang stoknya kurang lalu lempar `InsufficientStockException`.
+  - [x] Hitung harga, subtotal, total dari database (abaikan input harga klien).
+  - [x] Validasi pembayaran CASH untuk POS dan hitung kembalian.
+  - [x] Buat order dan order items (dengan snapshot nama dan harga).
+  - [x] Kurangi stok dan tulis `stock_movements` (`SALE_POS` / `SALE_ONLINE`).
+- [x] Implementasikan `POST /api/orders` (CASHIER, MEMBER). Channel ditentukan dari role. ADMIN ditolak 403.
+- [x] Implementasikan `GET /api/orders` dan `GET /api/orders/{id}` dengan pembatasan kepemilikan untuk MEMBER.
+- [x] Tes dasar: checkout POS valid, checkout ONLINE valid, keranjang kosong, quantity tidak valid, item tidak ada, uang kurang, harga palsu diabaikan.
+- [x] Tes HP-01: 5 barang, barang ke-4 habis -> 409, **semua stok dan jumlah baris tabel terkait tidak berubah**.
+- [x] Tes HP-05: item duplikat digabung lalu ditolak jika stok kurang.
+- [x] Tes HP-07: paksa kegagalan setelah beberapa barang diproses -> rollback penuh.
+- [x] Verifikasi manual di PostgreSQL bahwa constraint `stock >= 0` tetap aktif.
 
 ## Fase 7. Laporan
 

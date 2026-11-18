@@ -32,6 +32,27 @@ class ApiExceptionHandler
                 422,
                 $exception->errors(),
             ),
+            $exception instanceof InsufficientStockException => self::error(
+                'INSUFFICIENT_STOCK',
+                $exception->getMessage(),
+                409,
+                $exception->details,
+            ),
+            $exception instanceof InsufficientPaymentException => self::error(
+                'INSUFFICIENT_PAYMENT',
+                $exception->getMessage(),
+                422,
+                [
+                    'total_amount' => $exception->totalAmount,
+                    'amount_paid' => $exception->amountPaid,
+                ],
+            ),
+            $exception instanceof ItemNotFoundException => self::error(
+                'NOT_FOUND',
+                $exception->getMessage(),
+                404,
+                ['item_ids' => $exception->itemIds],
+            ),
             $exception instanceof AuthenticationException => self::error(
                 'UNAUTHENTICATED',
                 self::authenticationMessage($exception),
