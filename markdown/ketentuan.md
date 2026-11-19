@@ -1,105 +1,97 @@
-# Ketentuan Fase 8C - Frontend: Katalog Anggota dan Halaman Admin
+# Ketentuan Fase 9 - Pengujian Konkurensi & Verifikasi
 
 Instruksi rinci untuk fase yang sedang dikerjakan. File ini ditimpa setiap ganti fase atau sesi.
 
-Fase 8 dipecah menjadi tiga sesi. Sesi 8A dan 8B selesai. Sesi ini adalah **8C**, sesi terakhir Fase 8:
+Tujuan fase ini: **membuktikan dengan request paralel nyata** bahwa checkout aman terhadap race condition (HP-02, HP-03, HP-04, serta varian All-or-Nothing di bawah beban). Tes PHPUnit sebelumnya berjalan dalam satu koneksi, jadi belum membuktikan perilaku saat banyak request berebut stok.
 
-- Katalog dan pemesanan online anggota.
-- Halaman admin: barang, stok (restock, opname, riwayat mutasi), laporan penjualan.
-- Daftar verifikasi manual per role untuk pemilik proyek.
+Kerjakan HANYA Fase 9. Jangan mengerjakan Fase 10 (kecuali bagian README yang disebut di bawah). Jangan mengubah kode aplikasi (backend maupun frontend) kecuali yang disebut eksplisit di LANGKAH AWAL atau di uji kontrol negatif sementara (yang TIDAK boleh di-commit).
 
-Kerjakan HANYA sesi 8C. Jangan mengerjakan Fase 9. Jangan mengubah kode backend. Jika kontrak API ternyata berbeda dari dokumen, laporkan, jangan mengubah backend.
-
-Bagian dokumen yang relevan: `REQUIREMENTS.md` bagian 5.2, 5.3, 5.4, 5.5, 7, 8. `PRD.md` bagian 1 (BR-01 sampai BR-11), 3.3, 3.4, 3.5. `ARCHITECTURE.md` bagian 3 (Client), 4, 6.2, 6.3, 6.4. `RULES.md` bagian 3 poin 7, bagian 4 (frontend), bagian 5.
+Bagian dokumen yang relevan: `PRD.md` bagian 3.2 dan 4 (HP-01 sampai HP-07). `ARCHITECTURE.md` bagian 6.1, 9, 10. `RULES.md` bagian 2 dan 7.
 
 Jika isi file ini bertentangan dengan dokumen di `markdown/`, hentikan pekerjaan dan tanyakan dulu.
 
 ## LANGKAH AWAL
 
+Kerjakan berurutan. Langkah yang mengubah file diberi commit sendiri.
+
 1. Commit TERPISAH perubahan milik pemilik proyek (`markdown/ketentuan.md`) dengan pesan `docs: update phase instructions`. Jangan mengubah isinya.
-2. Pastikan `php artisan test`, `npm run lint`, dan `npm run build` lulus sebelum mulai.
-3. Jalankan `git grep -n "demo-password"` dan laporkan hasilnya. Tidak boleh ada kata sandi di source code (RULES bagian 6). Jika ada, hapus dan commit `fix: remove hardcoded password`.
-4. Perbaiki ketidaksesuaian kecil di `REQUIREMENTS.md` bagian 7: contoh pesan error 409 harus sama persis dengan kode ("Stok tidak mencukupi untuk satu atau beberapa barang."). Hanya satu baris itu. Commit `docs: align 409 message with code`.
-5. **Cek kontrak API asli SEBELUM menulis klien** (jangan menebak). Dengan token ADMIN lewat `curl`, tampilkan bentuk respons dan nama field untuk: `POST /items`, `PUT /items/{id}`, `POST /items/{id}/restock`, `POST /items/{id}/stock-opname` (termasuk kasus selisih 0 dengan `movement: null`), `GET /items/{id}/movements`, `GET /reports/sales?from&to`, dan contoh error 422 untuk `POST /items` dengan SKU duplikat. Ringkas temuannya di laporan.
+2. Pastikan `php artisan test`, `npm run lint`, dan `npm run build` lulus.
+3. **Lingkungan database.** Laporan 8C menyebut PostgreSQL port 5433 tidak berjalan dan dibuatkan cluster sementara di `/tmp/opencode/pgdata`. Laporkan: (a) apakah ada PostgreSQL lain yang sudah berjalan atau terpasang sebagai service di mesin ini, (b) di mana data `smart_koperasi` dev sekarang berada. Jangan memulai cluster kedua pada port yang sudah terpakai. Untuk fase ini boleh memakai cluster yang ada, tetapi catat risikonya (data di `/tmp` bisa hilang) dan sarankan pemilik memakai instalasi PostgreSQL yang stabil untuk demo.
+4. **Pesan error 409.** Laporan 8B menampilkan respons nyata "satu atau **beberapa** barang", sedangkan laporan 8C menyebut kode dan `REQUIREMENTS.md` memakai "satu atau **lebih**". Keduanya tidak mungkin benar. Jalankan `grep -rn "satu atau" backend/app backend/tests markdown/` dan tampilkan hasilnya. Samakan `REQUIREMENTS.md` dengan teks yang BENAR-BENAR dikembalikan server (jangan mengubah kode). Commit `docs: align 409 message with server`.
+5. **Aturan rentang laporan.** Server memakai selisih hari (`diffInDays > 366` ditolak), sehingga selisih 366 hari diterima, sedangkan klien memakai hitungan inklusif yang lebih ketat satu hari. Server adalah acuan. Ubah validasi rentang di `AdminReportPage` agar sama dengan server (selisih `to - from` maksimal 366 hari) dan perjelas kalimatnya di `REQUIREMENTS.md` bagian 5.5 ("selisih antara `from` dan `to` maksimal 366 hari"). Commit `fix(frontend): align report range validation with server`.
+6. **Pembatas laju global.** Jalankan `grep -rn "throttle\|RateLimiter" backend/bootstrap backend/routes backend/app backend/config` dan laporkan apakah ada pembatas laju selain login. Jika ada pembatas laju global pada `/api`, JANGAN mengubahnya diam-diam: laporkan batasnya karena dapat menggagalkan uji beban (respons 429), dan tanyakan keputusan.
 
 ## KEPUTUSAN DESAIN (sudah ditetapkan, ikuti dan sebutkan di laporan)
 
-1. **Prinsip sama dengan 8B:** klien bukan sumber kebenaran, tidak memblokir aturan bisnis kecuali batas UX yang disebut jelas. Pesan error server (termasuk `fieldErrors` per field) selalu ditampilkan. Semua pemanggilan API hanya lewat `src/api/`.
-2. **Anti klik ganda** untuk SEMUA form dan tombol yang mengubah data (checkout anggota, tambah/ubah barang, restock, opname). Buat hook `useSubmitGuard` (state `submitting` dan `useRef` penjaga) untuk halaman baru. Jangan merombak `PosPage` yang sudah berfungsi.
-3. **Katalog anggota (BR-09):** metode pembayaran hanya `TRANSFER` (tanpa pilihan CASH, tanpa input uang). Tampilkan catatan singkat: "Pesanan langsung tercatat dan stok berkurang. Pembayaran dicatat sebagai transfer." Tanpa reservasi dan tanpa batas waktu bayar.
-4. **Ubah barang tidak mengubah stok.** Form ubah hanya `sku`, `name`, `price`. Stok ditampilkan read-only dengan petunjuk "Ubah stok lewat menu Stok". Stok awal hanya ada di form tambah.
-5. **Opname meminta konfirmasi** sebelum dikirim (`window.confirm`) dengan ringkasan: stok sistem saat ini, stok fisik yang diinput, dan selisihnya. Restock tanpa konfirmasi.
-6. **Opname selisih 0:** respons `movement: null`. Tampilkan pesan "Stok sudah sesuai, tidak ada perubahan." (bukan error).
-7. **Laporan:** kirim selalu `from` dan `to` eksplisit (jangan mengandalkan default server). Default isian = hari ini pada `VITE_BUSINESS_TIMEZONE`. Validasi UX: `from <= to` dan rentang maksimal 366 hari. Pesan error server tetap ditampilkan.
-8. **Label bahasa Indonesia** untuk nilai enum, disimpan terpusat di `utils/labels.js`: channel (`POS` = "Kasir", `ONLINE` = "Online"), pembayaran (`CASH` = "Tunai", `TRANSFER` = "Transfer"), tipe mutasi (`SALE_POS` = "Penjualan Kasir", `SALE_ONLINE` = "Penjualan Online", `RESTOCK` = "Restock", `OPNAME` = "Stock Opname"). Nilai asli dari API tetap dipakai untuk logika.
-9. **Tanpa dependency baru, tanpa test framework baru.** CSS biasa.
+1. **Skrip tunggal, tanpa dependency:** `scripts/concurrency-test.mjs`, modul ES, hanya fitur bawaan Node (fetch global, Node 18+). Dilarang menambah paket npm.
+2. **Konfigurasi lewat environment, tanpa kata sandi di kode:**
+   - `BASE_URL` (default `http://localhost:8000/api`)
+   - `DEMO_PASSWORD` (WAJIB, tanpa default. Jika kosong, skrip berhenti dengan pesan jelas)
+   - `ADMIN_EMAIL`, `CASHIER_EMAIL`, `MEMBER_EMAIL` (default email seeder: `admin@example.test`, `cashier1@example.test`, `member1@example.test`)
+   - `ROUNDS` (opsional, menimpa jumlah ronde default tiap skenario)
+3. **Tidak merusak data yang ada.** Skrip tidak mereset database dan tidak menyentuh barang yang sudah ada. Setiap ronde membuat barang baru lewat `POST /items` (admin) dengan SKU unik (`CT-<runId>-<skenario>-<ronde>`) dan stok awal sesuai skenario. Sisa data uji dibiarkan (tidak ada endpoint hapus). Pemilik me-reset dengan `migrate:fresh --seed` sebelum demo.
+4. **Login sekali per run** (tiga akun) lalu memakai token. Login dibatasi 5 percobaan per menit: jika menerima 429 saat login, cetak "Tunggu satu menit lalu ulangi" dan keluar.
+5. **Start serentak:** siapkan semua payload dan token lebih dulu, lalu luncurkan seluruh request pada saat yang sama lewat satu gerbang (`await gate`) dan `Promise.allSettled`. Setiap request memakai `AbortSignal.timeout(30000)`.
+6. **Klasifikasi hasil.** 201 = sukses. 409 dengan `error.code = "INSUFFICIENT_STOCK"` = gagal yang diharapkan. SEMUA yang lain (5xx, 429, timeout, kesalahan jaringan, kode error lain) = **tak terduga**, dihitung sebagai kegagalan uji dan dicatat.
+7. **Verifikasi akhir langsung dari API setelah tiap ronde:** `GET /items/{id}` untuk stok akhir dan `GET /items/{id}/movements` untuk buku besar. Periksa: stok akhir tidak pernah negatif; stok akhir = stok awal - jumlah terjual; jumlah mutasi bertipe `SALE_*` = jumlah request 201; jumlah seluruh `quantity_change` = stok akhir (invarian ledger).
+8. **Ronde default** (dapat ditimpa `ROUNDS`): HP-02 = 10 ronde, HP-03 = 5, HP-04 = 5, HP-08 = 5. Balapan bersifat probabilistik, jadi satu kali lolos tidak cukup.
+9. **Keluaran:** ringkasan terbaca manusia per skenario dan per ronde (PASS/FAIL, jumlah 201/409/tak terduga, stok akhir, pemenang untuk HP-02), tabel ringkas di akhir, dan kode keluar proses `0` hanya jika SEMUA lolos, selain itu `1`. Pesan keluaran berbahasa Indonesia.
+10. **Persyaratan server:** skrip mencetak pengingat di awal bahwa server harus berjalan dengan banyak worker. `php artisan serve` biasa melayani satu request sekali jalan sehingga uji tidak bermakna. Catatan platform: `PHP_CLI_SERVER_WORKERS` tidak didukung di Windows (gunakan WSL, Laragon, atau Nginx + PHP-FPM).
 
-## FASE 8C
+## FASE 9
 
-### Struktur yang ditambahkan
-```text
-frontend/src/
-├── api/
-│   ├── items.js          # tambah: createItem, updateItem (listItems sudah ada)
-│   ├── stock.js          # restock, opname, listMovements
-│   └── reports.js        # salesReport
-├── hooks/
-│   └── useSubmitGuard.js
-├── components/
-│   ├── ItemPicker.jsx    # daftar barang + pencarian (diekstrak dari PosPage)
-│   └── SuccessPanel.jsx  # hanya bila memang mengurangi duplikasi
-├── utils/
-│   └── labels.js
-└── pages/
-    ├── CatalogPage.jsx
-    ├── AdminItemsPage.jsx
-    ├── AdminStockPage.jsx
-    └── AdminReportPage.jsx
+### Skenario dalam `scripts/concurrency-test.mjs`
+
+**HP-02 - rebutan stok terakhir (POS vs ONLINE).** Barang stok 1. Satu request POS (kasir, CASH dengan uang cukup) dan satu request ONLINE (anggota, TRANSFER), masing-masing kuantitas 1, diluncurkan serentak. Harapan: tepat satu 201 dan satu 409 `INSUFFICIENT_STOCK`, stok akhir 0, tepat satu mutasi `SALE_*`. Catat channel pemenang tiap ronde (informasi: seharusnya bervariasi).
+
+**HP-03 - stok 5, 20 request paralel.** Barang stok 5, 20 request kuantitas 1 (selang-seling kasir dan anggota). Harapan: tepat 5 respons 201, 15 respons 409, nol tak terduga, stok akhir 0, tepat 5 mutasi `SALE_*`.
+
+**HP-04 - urutan barang berlawanan (deadlock).** Dua barang A dan B masing-masing stok 1000. 10 request dengan keranjang [A, B] dan 10 request dengan keranjang [B, A] (kuantitas 1 per baris), serentak. Harapan: 20 respons 201, nol tak terduga (terutama nol 5xx), stok akhir A dan B masing-masing 980, ledger konsisten.
+
+**HP-08 (tambahan) - All-or-Nothing di bawah beban.** Barang A stok 1000 dan barang B stok 1. 10 request paralel, masing-masing keranjang berisi A x1 dan B x1. Harapan: tepat 1 respons 201 dan 9 respons 409; stok akhir **A = 999** (bukan 990: pengurangan A pada transaksi yang gagal wajib ter-rollback), stok akhir B = 0, mutasi `SALE_*` tepat 2 (satu untuk A, satu untuk B), ledger konsisten.
+
+### README
+Tambahkan bagian pendek di `README.md` (jika belum ada file, buat minimal): cara menjalankan server dengan banyak worker (`PHP_CLI_SERVER_WORKERS=8 php artisan serve`, catatan Windows), variabel environment skrip, perintah menjalankan skrip, dan arti kode keluarnya. Pelengkapan README lain dikerjakan di Fase 10.
+
+### PRD
+Tambahkan satu baris HP-08 pada tabel di `PRD.md` bagian 4 (skenario di atas). Perubahan dokumen ini disetujui, hanya itu.
+
+## VERIFIKASI (sertakan perintah dan output asli di laporan)
+
+1. Jalankan server: `PHP_CLI_SERVER_WORKERS=8 php artisan serve` (tampilkan perintahnya).
+2. Jalankan skrip penuh dengan `DEMO_PASSWORD` dari `backend/.env` (jangan menampilkan nilai sandinya di laporan). Tampilkan seluruh output, termasuk tabel ringkas dan kode keluar. Jalankan **dua kali berturut-turut** (tunggu satu menit di antaranya karena pembatas login) untuk menunjukkan hasil yang stabil.
+3. Setelah skrip, jalankan query konsistensi pada database dev dan tampilkan hasilnya (semuanya harus **0 baris**):
+
+```sql
+-- stok item harus sama dengan total mutasi
+SELECT i.id FROM items i
+LEFT JOIN stock_movements m ON m.item_id = i.id
+GROUP BY i.id, i.stock
+HAVING i.stock <> COALESCE(SUM(m.quantity_change), 0);
+
+-- tidak boleh ada stok negatif
+SELECT id, stock FROM items WHERE stock < 0;
+
+-- total order harus sama dengan jumlah subtotal item
+SELECT o.id FROM orders o
+JOIN order_items oi ON oi.order_id = o.id
+GROUP BY o.id, o.total_amount
+HAVING SUM(oi.subtotal) <> o.total_amount;
+
+-- mutasi penjualan harus sama dengan kuantitas order
+SELECT o.id FROM orders o
+WHERE (SELECT COALESCE(SUM(quantity), 0) FROM order_items WHERE order_id = o.id)
+   <> -(SELECT COALESCE(SUM(quantity_change), 0) FROM stock_movements WHERE order_id = o.id);
 ```
-Ganti rute `/catalog`, `/admin/items`, `/admin/stock`, `/admin/reports` dari `Placeholder` ke halaman nyata. Setelah semua rute memakai halaman nyata, **hapus `Placeholder.jsx`** jika tidak terpakai lagi (tanpa kode mati).
 
-Ekstraksi `ItemPicker` dari `PosPage` boleh dilakukan HANYA jika perilaku POS tetap identik (cari, stok habis nonaktif, klik menambah ke keranjang). Lakukan di commit terpisah lebih dulu: `refactor(frontend): extract ItemPicker`, dan pastikan lint dan build lulus. Jika ragu, duplikasikan sebagian kecil markup daripada mengubah POS.
-
-### `CatalogPage` (`/catalog`, hanya MEMBER)
-- Pakai ulang `useCart`, `CartTable`, `ErrorAlert`, `StockShortageAlert`, `buildCheckoutPayload`, dan pola pemuatan ulang stok dari `PosPage`.
-- Daftar barang dengan pencarian (nama atau SKU), tampilan nama, SKU, harga, stok. Stok 0 = "Habis" dan tombol tambah nonaktif.
-- Keranjang dan tombol "Pesan Sekarang" sesuai keputusan nomor 3. Payload: `payment_method = "TRANSFER"` dan `items`, tanpa `amount_paid` dan tanpa harga.
-- Setelah sukses (201): panel hasil dari respons server (kode, total, jumlah barang), tombol "Lihat Struk" (`/orders/:id`), "Pesanan Saya" (`/orders`), "Belanja Lagi". Kosongkan keranjang, muat ulang stok.
-- Penanganan error sama seperti POS: 409 (daftar semua barang kurang, baris disorot, keranjang tetap, stok dimuat ulang), 404 (barang tidak ditemukan), 422 lainnya, `NETWORK_ERROR` dengan pesan: "Koneksi terputus. Periksa halaman Pesanan Saya sebelum mengulang agar tidak tercatat dua kali."
-
-### `AdminItemsPage` (`/admin/items`, hanya ADMIN)
-- Tabel barang: SKU, nama, harga, stok, tombol "Ubah". Tombol "Tambah Barang".
-- Form tambah/ubah sebagai panel inline di halaman (bukan modal berlapis): tambah = `sku`, `name`, `price`, `stock` (stok awal >= 0). Ubah = `sku`, `name`, `price` (stok read-only).
-- Error 422 ditampilkan per field (misalnya SKU duplikat di field SKU). Isi form tidak hilang saat error.
-- Setelah sukses: tutup form, muat ulang daftar, tampilkan pesan sukses singkat. Tanpa hapus barang (di luar ruang lingkup).
-- Angka harga dan stok dikirim sebagai integer.
-
-### `AdminStockPage` (`/admin/stock`, hanya ADMIN)
-- Pilih barang dari daftar (dropdown atau daftar yang bisa dicari). Tampilkan stok saat ini.
-- Form **Restock**: `quantity` (integer >= 1), `note` opsional (maksimal 255).
-- Form **Opname**: `actual_stock` (integer >= 0), `note` opsional, dengan konfirmasi (keputusan nomor 5) dan penanganan selisih 0 (keputusan nomor 6).
-- Tabel **Riwayat mutasi** barang terpilih (terbaru di atas, dari server): waktu (`formatDateTime`), tipe (label Indonesia), perubahan (tanda + atau -), stok sebelum dan sesudah, nama pelaku, catatan. Mutasi yang punya `order_id` menautkan ke `/orders/:id`.
-- Setelah restock/opname sukses: perbarui stok yang tampil dan muat ulang riwayat. Tampilkan pesan sukses.
-
-### `AdminReportPage` (`/admin/reports`, hanya ADMIN)
-- Dua input tanggal (`type="date"`) dan tombol "Tampilkan", sesuai keputusan nomor 7.
-- Hasil: periode (dengan zona waktu), total transaksi, total pendapatan (`formatRupiah`), tabel per channel (selalu Kasir dan Online), tabel barang terlaris (nama, jumlah terjual, pendapatan).
-- Keadaan: memuat, kosong (semua 0 dan "Belum ada penjualan pada periode ini"), error server per field atau umum.
-
-## VERIFIKASI
-
-Opencode tidak dapat melihat tampilan, jadi laporkan bukti yang bisa diperiksa:
-
-1. `npm run lint` bersih dan `npm run build` lulus (tampilkan ringkasan).
-2. Hasil cek kontrak API (langkah awal nomor 5), termasuk pengakuan jika ada yang berbeda dari dokumen.
-3. Bukti payload checkout anggota tidak memuat harga atau `amount_paid` (skrip Node sekali pakai, tidak di-commit, memakai `buildCheckoutPayload` dengan TRANSFER).
-4. Daftar file yang dibuat, diubah, dan dihapus, serta tabel rute akhir.
-5. **Daftar periksa end-to-end per role** yang akan dijalankan pemilik di browser. Tulis sebagai tabel (langkah, hasil yang diharapkan) untuk ADMIN, CASHIER, dan MEMBER, mencakup: login dan navigasi, tambah dan ubah barang, restock dan opname (termasuk selisih 0), riwayat mutasi, checkout kasir (sukses dan 409), pesanan online anggota (sukses dan 409), struk dan cetak, riwayat transaksi tiap role, laporan penjualan, serta akses terlarang antar-role.
+4. **Uji kontrol negatif (WAJIB, untuk membuktikan skrip memang mampu mendeteksi race).** Pada branch sementara `tmp/negative-control` (JANGAN di-commit ke branch utama): ubah sementara `ItemRepository::lockItemsForUpdate` menjadi query TANPA `FOR UPDATE` (guard transaksi dibiarkan). Jalankan ulang HP-03 (dan HP-08 bila memungkinkan) dan tampilkan hasilnya. Harapan: skrip **GAGAL** (kelebihan penjualan, ledger tidak konsisten, atau respons 5xx karena CHECK database). Setelah itu kembalikan: `git checkout` branch utama, hapus branch sementara, dan tunjukkan bahwa `git status` bersih dan `git diff main` kosong. Jika skrip tetap LOLOS tanpa kunci, uji dianggap tidak valid: laporkan dan perbaiki skrip (misalnya perbesar paralelisme atau jumlah ronde) sebelum melanjutkan.
+5. `php artisan test` hijau sesudah branch kembali ke utama.
+6. Laporkan juga durasi tiap skenario dan hal yang mungkin membatasi paralelisme (jumlah worker, pembatas laju).
 
 ## PENUTUP
 
-Jangan menambah fitur di luar dokumen (tanpa hapus barang, pagination, ekspor laporan, grafik, penyesuaian otomatis jumlah ke stok, pembatalan pesanan). Setelah selesai:
+Jangan menambah fitur atau endpoint (tanpa endpoint hapus, tanpa idempotency key, tanpa mengubah logika checkout). Setelah selesai:
 
-1. Centang di Fase 8 `TASKS.md` HANYA kotak yang tercakup sesi ini: `CatalogPage`, `AdminItemsPage`, `AdminStockPage`, dan `AdminReportPage`. **Jangan mencentang "Verifikasi manual alur tiap role dari ujung ke ujung"**: itu dicentang pemilik setelah mencoba di browser.
-2. Commit `feat(frontend): add catalog and admin pages (phase 8c)` (ekstraksi `ItemPicker` dan perbaikan kecil di langkah awal sudah di commit terpisah).
-3. Laporkan ringkasan, temuan kontrak API, keputusan, asumsi, output verifikasi, dan hal yang diragukan.
+1. Centang SATU PER SATU kotak Fase 9 di `TASKS.md` yang terverifikasi.
+2. Commit `test(concurrency): add parallel checkout verification script (phase 9)` (skrip, README, dan baris PRD HP-08; commit perbaikan langkah awal sudah terpisah).
+3. Laporkan ringkasan, keputusan, asumsi, seluruh output verifikasi (skrip dua kali, query, uji kontrol negatif, tes PHPUnit), dan hal yang diragukan atau tidak sempat dikerjakan.
