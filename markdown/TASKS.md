@@ -94,9 +94,9 @@
 
 ## Fase 8. Frontend React
 
-- [ ] Siapkan instance Axios (base URL dari env, header token) dan `AuthContext`.
-- [ ] Buat `ProtectedRoute` berbasis role dan navigasi per role.
-- [ ] `LoginPage` dan registrasi anggota.
+- [x] Siapkan instance Axios (base URL dari env, header token) dan `AuthContext`.
+- [x] Buat `ProtectedRoute` berbasis role dan navigasi per role.
+- [x] `LoginPage` dan registrasi anggota.
 - [ ] `PosPage` (kasir): cari/pilih barang, keranjang, input pembayaran, tombol checkout, tampilkan kembalian.
 - [ ] Tampilkan error 409 dengan daftar barang yang stoknya kurang (mudah dibaca). Keranjang tidak dihapus saat gagal.
 - [ ] Cegah klik ganda pada tombol checkout (disable saat request berjalan).
