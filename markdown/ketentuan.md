@@ -1,122 +1,109 @@
-# Ketentuan Fase 8A - Frontend: Fondasi, Autentikasi, Routing
+# Ketentuan Fase 8B - Frontend: Kasir (POS), Struk, Daftar Transaksi
 
 Instruksi rinci untuk fase yang sedang dikerjakan. File ini ditimpa setiap ganti fase atau sesi.
 
-Fase 8 (Frontend React) dipecah menjadi tiga sesi:
+Fase 8 dipecah menjadi tiga sesi. Sesi 8A selesai. Sesi ini adalah **8B**:
 
-- **8A (sesi ini):** fondasi, autentikasi, routing, layout.
-- 8B: halaman kasir (POS), struk, daftar transaksi.
-- 8C: katalog anggota, halaman admin (barang, stok, laporan), verifikasi per role.
+- **8B (sesi ini):** halaman kasir (POS), tampilan error checkout, anti klik ganda, struk, daftar transaksi.
+- 8C: katalog anggota, halaman admin (barang, stok, laporan), verifikasi tiap role.
 
-Kerjakan HANYA sesi 8A. Jangan membuat halaman fungsional untuk 8B dan 8C (hanya placeholder rute). Jangan mengubah kode backend.
+Kerjakan HANYA sesi 8B. Jangan membuat halaman 8C (`/catalog`, `/admin/*`) dan jangan mengerjakan Fase 9. Jangan mengubah kode backend.
 
-Bagian dokumen yang relevan: `REQUIREMENTS.md` bagian 3, 5.1, 7, 8. `ARCHITECTURE.md` bagian 2, 3 (Client), 4 (struktur `frontend/`), 7. `RULES.md` bagian 3 poin 7, bagian 4 (frontend), bagian 6.
+Bagian dokumen yang relevan: `REQUIREMENTS.md` bagian 5.4, 7, 8. `PRD.md` bagian 1 (BR-01 sampai BR-11), 3.1, 3.5 (butir 1 dan 2), 4. `ARCHITECTURE.md` bagian 3 (Client), 4. `RULES.md` bagian 3 poin 7, bagian 4 (frontend), bagian 5.
 
 Jika isi file ini bertentangan dengan dokumen di `markdown/`, hentikan pekerjaan dan tanyakan dulu.
 
 ## LANGKAH AWAL
 
-1. Commit TERPISAH perubahan milik pemilik proyek (`markdown/ketentuan.md`, `markdown/prompt.txt`) dengan pesan `docs: update phase instructions`. Jangan mengubah isinya.
-2. Pastikan `php artisan test` hijau dan `npm run build` di `frontend/` lulus sebelum mulai.
-3. Baca kode backend yang relevan SEBELUM menulis klien (jangan menebak): `RegisterRequest`, `LoginRequest`, `AuthController`/`UserResource`. Catat bentuk respons asli `register`, `login`, `me`, dan aturan validasi register (apakah butuh `password_confirmation`). Laporkan temuannya.
+1. Commit TERPISAH perubahan milik pemilik proyek (`markdown/ketentuan.md`) dengan pesan `docs: update phase instructions`. Jangan mengubah isinya.
+2. Pastikan `php artisan test` hijau dan `npm run build` serta `npm run lint` di `frontend/` lulus sebelum mulai.
+3. Baca bentuk respons asli backend untuk `GET /api/items`, `POST /api/orders`, `GET /api/orders`, `GET /api/orders/{id}` (lihat `ItemResource`, `OrderResource`, dan tes `CheckoutTest`/`OrderHistoryTest`). Jangan menebak nama field. Laporkan temuannya.
 
 ## KEPUTUSAN DESAIN (sudah ditetapkan, ikuti dan sebutkan di laporan)
 
-1. **Dependency:** hanya yang sudah terpasang (React, React Router, Axios). Tanpa UI library atau Tailwind. Gaya memakai CSS biasa (satu `index.css` global atau CSS per komponen). Tampilan bersih, rapi, dan responsif sederhana.
-2. **Konfigurasi:** `VITE_API_BASE_URL` (default `http://localhost:8000/api`) dan `VITE_BUSINESS_TIMEZONE` (default `Asia/Makassar`). Buat `frontend/.env.example`. Pastikan `frontend/.env` ada di `.gitignore`.
-3. **Penyimpanan token:** `sessionStorage` dengan key `koperasi_token`. Data user TIDAK disimpan permanen. Saat aplikasi dimuat, jika ada token, panggil `GET /auth/me`. Selama pengecekan tampilkan status memuat (jangan kedip ke halaman login).
-4. **401 di mana pun:** interceptor Axios menghapus token dan mengarahkan ke `/login` (kecuali saat sedang di endpoint login itu sendiri, supaya pesan "email atau password salah" tetap tampil).
-5. **Rute dan akses:**
+1. **Klien tidak pernah menjadi sumber kebenaran harga, total, atau stok.** Payload checkout hanya berisi `payment_method`, `amount_paid` (hanya untuk CASH), dan `items[{item_id, quantity}]`. Dilarang mengirim harga, total, channel, atau role. Total yang tampil sebelum checkout diberi label "Total (perkiraan)". Setelah sukses, tampilkan angka dari **respons server**, bukan hitungan klien.
+2. **Klien tidak memblokir aturan bisnis; server yang memutuskan.** Tombol checkout hanya dinonaktifkan bila: keranjang kosong, CASH tanpa `amount_paid` terisi, atau request sedang berjalan. Kuantitas yang melebihi stok yang sedang tampil dan uang yang kurang dari perkiraan total hanya diberi **peringatan visual**, tetapi tetap boleh dikirim. Alasan: data stok di layar bisa basi, dan demo harus bisa menunjukkan penolakan dari server (409 dan 422). Batas UX yang BOLEH memblokir: kuantitas 1..1000 (dijepit ke rentang itu) dan maksimal 50 baris keranjang (tampilkan pesan).
+3. **Keranjang tidak pernah dihapus saat checkout gagal.** Keranjang hanya dikosongkan setelah sukses.
+4. **Anti klik ganda dua lapis:** state `submitting` yang menonaktifkan tombol, DAN `useRef` penjaga yang menolak panggilan kedua sebelum state sempat dirender ulang.
+5. **Hasil tak pasti saat jaringan putus:** karena tidak ada idempotency key, jika terjadi `NETWORK_ERROR` pada checkout, tampilkan: "Koneksi terputus. Periksa halaman Transaksi sebelum mengulang agar tidak tercatat dua kali." Keranjang tetap dipertahankan.
+6. **Data stok dimuat ulang** (`GET /items`) saat halaman dibuka, setelah checkout sukses, dan setelah checkout gagal 409/404. Sediakan tombol "Muat ulang stok".
+7. **Pencarian di POS** adalah filter sisi klien atas daftar yang sudah dimuat (nama atau SKU, tidak sensitif huruf besar-kecil). Tanpa pagination dan tanpa pencarian ke server.
+8. **Tanpa dependency baru.** CSS biasa. Tanpa test framework baru.
 
-| Rute | Role | Isi sesi 8A |
-|---|---|---|
-| `/login`, `/register` | publik | Halaman nyata |
-| `/pos` | CASHIER | Placeholder |
-| `/catalog` | MEMBER | Placeholder |
-| `/orders`, `/orders/:id` | semua role | Placeholder |
-| `/admin/items`, `/admin/stock`, `/admin/reports` | ADMIN | Placeholder |
-| `*` | - | Halaman 404 |
+## FASE 8B
 
-   - Beranda per role setelah login: ADMIN -> `/admin/items`, CASHIER -> `/pos`, MEMBER -> `/catalog`. Rute `/` mengarah ke beranda sesuai role (atau `/login` jika belum login).
-   - Role tidak sesuai: tampilkan halaman "Anda tidak memiliki akses" (BUKAN redirect berulang yang bisa menyebabkan loop).
-   - Pengguna yang sudah login membuka `/login` atau `/register` -> diarahkan ke berandanya.
-6. **Navigasi per role:** ADMIN: Barang, Stok, Laporan, Transaksi. CASHIER: Kasir, Transaksi. MEMBER: Katalog, Pesanan Saya.
-7. **Registrasi:** hanya untuk anggota (backend memaksa role `MEMBER`). Klien TIDAK mengirim field `role`. Setelah register sukses: jika respons berisi token, pakai langsung. Jika tidak, panggil login dengan kredensial yang sama. Lalu arahkan ke beranda.
-8. **Aturan bisnis tetap di server.** Validasi di klien hanya untuk UX (field wajib, format email, panjang password sesuai aturan backend). Pesan error server (termasuk `details` per field untuk 422) harus ditampilkan, bukan diganti pesan karangan klien.
-
-## FASE 8A
-
-### Struktur (sesuai `ARCHITECTURE.md` bagian 4, hanya yang dibutuhkan sesi ini)
+### Struktur yang ditambahkan
 ```text
 frontend/src/
 ├── api/
-│   ├── client.js        # instance Axios + interceptor
-│   ├── errors.js        # parseApiError
-│   └── auth.js          # register, login, logout, me
-├── context/AuthContext.jsx
+│   ├── items.js          # listItems
+│   └── orders.js         # checkout, listOrders, getOrder
+├── hooks/
+│   └── useCart.js        # state keranjang (dipakai ulang di 8C untuk katalog anggota)
 ├── components/
-│   ├── AppLayout.jsx    # header, nav per role, <Outlet/>
-│   ├── ProtectedRoute.jsx
-│   ├── FormField.jsx    # label + input + pesan error field
-│   └── Loading.jsx
-├── pages/
-│   ├── LoginPage.jsx
-│   ├── RegisterPage.jsx
-│   ├── ForbiddenPage.jsx
-│   ├── NotFoundPage.jsx
-│   └── Placeholder.jsx  # dipakai sementara oleh halaman 8B/8C
-├── utils/format.js
-├── App.jsx
-└── main.jsx
+│   ├── CartTable.jsx     # baris keranjang, ubah jumlah, hapus (dipakai ulang di 8C)
+│   ├── ErrorAlert.jsx    # tampil error API seragam, role="alert"
+│   └── StockShortageAlert.jsx   # daftar barang stok kurang dari 409
+├── utils/
+│   └── checkout.js       # buildCheckoutPayload (murni, tanpa efek samping)
+└── pages/
+    ├── PosPage.jsx
+    ├── OrdersPage.jsx
+    └── ReceiptPage.jsx
 ```
-Jangan membuat file untuk halaman 8B/8C selain `Placeholder.jsx` yang dipakai bersama. Jangan membuat modul API untuk `items`, `orders`, `stock`, `reports` sekarang (tanpa kode mati).
+Ganti rute `/pos`, `/orders`, `/orders/:id` dari `Placeholder` ke halaman nyata. Jangan menyentuh rute 8C. Jangan membuat modul API untuk stok, laporan, atau pembuatan barang.
 
-### `api/client.js`
-- Instance Axios dengan `baseURL` dari `VITE_API_BASE_URL`, header `Accept: application/json`.
-- Interceptor request: tambahkan `Authorization: Bearer <token>` dari `sessionStorage` bila ada.
-- Interceptor response: penanganan 401 (keputusan nomor 4) tanpa menyebabkan loop redirect.
+### `utils/checkout.js` - `buildCheckoutPayload(lines, paymentMethod, amountPaid)`
+Fungsi murni. Keluaran: `{ payment_method, items: [{item_id, quantity}], amount_paid? }`. `amount_paid` HANYA disertakan jika `payment_method === "CASH"` dan berupa integer. Tidak boleh ada field harga atau total.
 
-### `api/errors.js` - `parseApiError(err)`
-Mengembalikan objek seragam `{ status, code, message, details, fieldErrors }`:
-- Respons API: ambil dari `error.code`, `error.message`, `error.details`. Untuk 422, `fieldErrors` = `details` per field (ambil pesan pertama tiap field).
-- Tanpa respons (jaringan/CORS/server mati): `code = "NETWORK_ERROR"`, `message = "Tidak dapat terhubung ke server."`.
-- Respons tak terduga: `code = "UNKNOWN_ERROR"`, pesan umum. Jangan menampilkan data mentah.
-Fungsi ini akan dipakai ulang di sesi 8B dan 8C (termasuk membaca `details` 409 `INSUFFICIENT_STOCK`), jadi pastikan `details` diteruskan apa adanya.
+### `hooks/useCart.js`
+- Baris: `{ itemId, sku, name, price, quantity }` (harga hanya untuk tampilan perkiraan).
+- Fungsi: `add(item)` (barang yang sama menambah kuantitas), `setQuantity(itemId, qty)` (dijepit 1..1000), `remove(itemId)`, `clear()`, serta nilai turunan `lines`, `lineCount`, `estimatedTotal`.
+- Tolak penambahan baris ke-51 dan beri tahu pemanggil.
 
-### `utils/format.js`
-- `formatRupiah(n)` memakai `Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 })`.
-- `formatDateTime(isoString)` mengubah timestamp UTC dari API ke zona waktu bisnis (`Intl.DateTimeFormat` dengan `timeZone` dari env), diberi akhiran "WITA" bila zonanya `Asia/Makassar`.
+### `PosPage` (`/pos`, hanya CASHIER)
+Tata letak dua panel (satu kolom di layar sempit):
+- **Kiri, daftar barang:** kolom pencarian, daftar nama, SKU, harga, stok. Stok 0 menampilkan "Habis" dan tombol tambah dinonaktifkan. Klik menambah ke keranjang.
+- **Kanan, keranjang dan pembayaran:**
+  - `CartTable` dengan kontrol jumlah dan hapus. Baris yang kuantitasnya melebihi stok yang sedang tampil diberi peringatan "Melebihi stok tampil (n)" tetapi tetap bisa diproses.
+  - Pilihan metode: `CASH` (default) atau `TRANSFER`.
+  - CASH: input `amount_paid` (angka bulat >= 0). Tampilkan perkiraan kembalian, atau peringatan "Uang kurang dari perkiraan total" bila kurang. TRANSFER: tanpa input uang.
+  - Tombol "Checkout" sesuai keputusan nomor 2 dan 4.
+- **Setelah sukses (201):** tampilkan panel hasil dari respons server (kode, total, dibayar, kembalian, jumlah barang), tombol "Lihat Struk" (`/orders/:id`) dan "Transaksi Baru". Kosongkan keranjang dan reset input pembayaran, muat ulang stok.
+- **Penanganan error** (semua lewat `parseApiError`, keranjang tetap):
+  - `409 INSUFFICIENT_STOCK`: tampilkan `StockShortageAlert` yang mendaftar SEMUA barang di `details` (nama, diminta, tersedia). Baris keranjang terkait disorot. Muat ulang stok.
+  - `404 NOT_FOUND` dengan `details.item_ids`: pesan bahwa ada barang yang tidak ditemukan, sorot barangnya jika masih ada di keranjang, muat ulang stok.
+  - `422 INSUFFICIENT_PAYMENT`: tampilkan pesan server beserta `total_amount` dan `amount_paid` dari `details`.
+  - `422 VALIDATION_ERROR` lainnya: tampilkan pesan server dan `fieldErrors` bila ada.
+  - `NETWORK_ERROR`: keputusan nomor 5.
+  - Lainnya: pesan umum dari `parseApiError`, tanpa data mentah.
+- Alert error hilang saat pengguna mengubah keranjang atau memulai checkout baru.
 
-### `context/AuthContext.jsx`
-- Menyediakan `{ user, token, loading, login, register, logout }`.
-- `logout`: panggil `POST /auth/logout`, lalu SELALU hapus token dan state lokal walaupun request gagal.
-- Hook `useAuth()` melempar error jika dipakai di luar provider.
+### `OrdersPage` (`/orders`, semua role)
+- `GET /orders`. Judul "Pesanan Saya" untuk MEMBER, "Riwayat Transaksi" untuk CASHIER dan ADMIN.
+- Kolom: kode, waktu (`formatDateTime`), channel (POS/ONLINE), metode pembayaran, total (`formatRupiah`), dan nama pelaku (hanya untuk CASHIER dan ADMIN). Baris menautkan ke `/orders/:id`.
+- Keadaan: memuat, kosong ("Belum ada transaksi"), error dengan tombol coba lagi. Tanpa pagination (backend mengembalikan semua).
 
-### `ProtectedRoute` dan `AppLayout`
-- `ProtectedRoute` menerima daftar role opsional. Belum login -> `/login` (simpan lokasi tujuan agar bisa kembali setelah login). Role salah -> `ForbiddenPage`.
-- `AppLayout`: nama aplikasi, nama pengguna dan badge role, navigasi sesuai keputusan nomor 6 dengan penanda tautan aktif, tombol keluar, area konten via `<Outlet/>`.
-
-### `LoginPage` dan `RegisterPage`
-- Tombol submit dinonaktifkan dan menampilkan status saat request berjalan (cegah klik ganda).
-- Tampilkan pesan error server. Login gagal menampilkan pesan generik dari API. Register menampilkan error per field dari `fieldErrors`.
-- Label terhubung ke input, error dibacakan (`aria-live`/`role="alert"`).
-- Isi form tidak hilang saat terjadi error validasi.
+### `ReceiptPage` (`/orders/:id`, semua role)
+- `GET /orders/{id}`. Tampilkan: nama koperasi, kode, waktu (`formatDateTime`), nama pelaku, channel, metode pembayaran, tabel barang (nama, jumlah, harga satuan, subtotal), total, dibayar, kembalian. Untuk TRANSFER tampilkan "Transfer" dan tanpa baris kembalian.
+- 404 -> pesan "Transaksi tidak ditemukan" dengan tautan kembali ke `/orders` (MEMBER yang membuka transaksi orang lain juga mendapat 404 dari server, perlakukan sama).
+- Tombol "Cetak" memanggil `window.print()` dan tombol "Kembali".
+- CSS cetak (`@media print`): sembunyikan header, navigasi, dan tombol. Struk berukuran sempit (sekitar lebar kertas struk) dan rapi.
 
 ## VERIFIKASI
 
 Opencode tidak dapat melihat tampilan, jadi laporkan bukti yang bisa diperiksa:
 
-1. `npm run build` lulus (tampilkan ringkasan output). Jika ESLint terpasang, `npm run lint` bersih.
-2. Cek CORS dari origin klien, tampilkan output header:
-   `curl -i -X OPTIONS http://localhost:8000/api/auth/login -H "Origin: http://localhost:5173" -H "Access-Control-Request-Method: POST" -H "Access-Control-Request-Headers: content-type,authorization"`
-   Harus memuat `Access-Control-Allow-Origin: http://localhost:5173`. Jika gagal, perbaiki konfigurasi CORS backend (itu satu-satunya perubahan backend yang diizinkan) dan jelaskan.
-3. Tabel rute akhir (path, role, komponen) dan daftar file yang dibuat.
-4. Panduan singkat cara pemilik mencoba: perintah menjalankan backend dan frontend, akun demo mana yang dipakai untuk tiap role (email dari seeder, password dari `SEED_DEFAULT_PASSWORD`), dan apa yang seharusnya terlihat. Pemilik proyek yang memeriksa tampilan di browser.
+1. `npm run lint` bersih dan `npm run build` lulus (tampilkan ringkasan).
+2. Bukti payload tidak memuat harga: jalankan skrip Node satu kali pakai (tidak di-commit) yang mengimpor `buildCheckoutPayload` dan mencetak payload untuk kasus CASH dan TRANSFER, termasuk saat `amount_paid` diisi string atau kosong. Tampilkan output.
+3. Siapkan **urutan `curl` untuk skenario HP-01 di UI** dan tulis di laporan sehingga pemilik bisa mencobanya: login sebagai kasir dan anggota, ambil `item_id` dan stok, lalu habiskan stok satu barang lewat checkout ONLINE (anggota) SETELAH keranjang kasir terisi di browser. Setelah itu pemilik menekan Checkout di POS dan harus melihat panel 409 yang mendaftar barang bermasalah dengan keranjang tetap utuh.
+4. Daftar file yang dibuat atau diubah dan tabel rute akhir.
+5. Panduan singkat cara pemilik mencoba tiap alur dan apa yang seharusnya terlihat (sukses CASH dengan kembalian, sukses TRANSFER, 409, uang kurang, klik ganda cepat, cetak struk, riwayat sebagai kasir dan sebagai anggota).
 
 ## PENUTUP
 
-Jangan menambah fitur di luar dokumen (tanpa lupa password, edit profil, mode gelap, internasionalisasi). Setelah selesai:
+Jangan menambah fitur di luar dokumen (tanpa penyesuaian otomatis jumlah ke stok, diskon, scan barcode, atau idempotency key). Setelah selesai:
 
-1. Centang HANYA tiga kotak Fase 8 di `TASKS.md` yang tercakup sesi ini: Axios + `AuthContext`, `ProtectedRoute` + navigasi per role, `LoginPage` + registrasi anggota. Kotak lain tetap kosong.
-2. Commit `feat(frontend): add auth, routing, and layout (phase 8a)`.
-3. Laporkan ringkasan, temuan bentuk respons backend (langkah awal nomor 3), keputusan, asumsi, output build dan CORS, serta hal yang diragukan.
+1. Centang HANYA kotak Fase 8 `TASKS.md` yang tercakup sesi ini: `PosPage` (cari/pilih, keranjang, pembayaran, checkout, kembalian), tampilan error 409 dengan keranjang tetap, cegah klik ganda, dan `OrdersPage` serta `ReceiptPage`. Kotak lain tetap kosong.
+2. Commit `feat(frontend): add pos, receipt, and order history (phase 8b)`.
+3. Laporkan ringkasan, temuan bentuk respons backend, keputusan, asumsi, output verifikasi, dan hal yang diragukan.
