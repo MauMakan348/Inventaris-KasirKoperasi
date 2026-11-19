@@ -9,14 +9,14 @@ import { CHANNEL_LABELS, labelFor } from '../utils/labels'
 
 const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000
 
-function dayCount(from, to) {
+function dayDifference(from, to) {
   const [fromYear, fromMonth, fromDay] = from.split('-').map(Number)
   const [toYear, toMonth, toDay] = to.split('-').map(Number)
 
   const start = Date.UTC(fromYear, fromMonth - 1, fromDay)
   const end = Date.UTC(toYear, toMonth - 1, toDay)
 
-  return Math.floor((end - start) / MILLISECONDS_PER_DAY) + 1
+  return Math.floor((end - start) / MILLISECONDS_PER_DAY)
 }
 
 function validatePeriod(from, to) {
@@ -39,7 +39,7 @@ function validatePeriod(from, to) {
     return errors
   }
 
-  if (dayCount(from, to) > 366) {
+  if (dayDifference(from, to) > 366) {
     errors.to = 'Rentang maksimal 366 hari.'
   }
 

@@ -146,7 +146,7 @@ Aturan parameter:
 
 - `from` dan `to` wajib berformat ketat `YYYY-MM-DD` dan keduanya inklusif.
 - Keduanya dihilangkan: default hari ini pada zona waktu bisnis.
-- Hanya salah satu diisi, `from` > `to`, rentang lebih dari 366 hari, atau tanggal mustahil: 422 `VALIDATION_ERROR`.
+- Hanya salah satu diisi, `from` > `to`, selisih antara `from` dan `to` maksimal 366 hari, atau tanggal mustahil: 422 `VALIDATION_ERROR`.
 
 Contoh respons **200**:
 
