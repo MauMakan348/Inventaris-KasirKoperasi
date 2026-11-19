@@ -1,109 +1,105 @@
-# Ketentuan Fase 8B - Frontend: Kasir (POS), Struk, Daftar Transaksi
+# Ketentuan Fase 8C - Frontend: Katalog Anggota dan Halaman Admin
 
 Instruksi rinci untuk fase yang sedang dikerjakan. File ini ditimpa setiap ganti fase atau sesi.
 
-Fase 8 dipecah menjadi tiga sesi. Sesi 8A selesai. Sesi ini adalah **8B**:
+Fase 8 dipecah menjadi tiga sesi. Sesi 8A dan 8B selesai. Sesi ini adalah **8C**, sesi terakhir Fase 8:
 
-- **8B (sesi ini):** halaman kasir (POS), tampilan error checkout, anti klik ganda, struk, daftar transaksi.
-- 8C: katalog anggota, halaman admin (barang, stok, laporan), verifikasi tiap role.
+- Katalog dan pemesanan online anggota.
+- Halaman admin: barang, stok (restock, opname, riwayat mutasi), laporan penjualan.
+- Daftar verifikasi manual per role untuk pemilik proyek.
 
-Kerjakan HANYA sesi 8B. Jangan membuat halaman 8C (`/catalog`, `/admin/*`) dan jangan mengerjakan Fase 9. Jangan mengubah kode backend.
+Kerjakan HANYA sesi 8C. Jangan mengerjakan Fase 9. Jangan mengubah kode backend. Jika kontrak API ternyata berbeda dari dokumen, laporkan, jangan mengubah backend.
 
-Bagian dokumen yang relevan: `REQUIREMENTS.md` bagian 5.4, 7, 8. `PRD.md` bagian 1 (BR-01 sampai BR-11), 3.1, 3.5 (butir 1 dan 2), 4. `ARCHITECTURE.md` bagian 3 (Client), 4. `RULES.md` bagian 3 poin 7, bagian 4 (frontend), bagian 5.
+Bagian dokumen yang relevan: `REQUIREMENTS.md` bagian 5.2, 5.3, 5.4, 5.5, 7, 8. `PRD.md` bagian 1 (BR-01 sampai BR-11), 3.3, 3.4, 3.5. `ARCHITECTURE.md` bagian 3 (Client), 4, 6.2, 6.3, 6.4. `RULES.md` bagian 3 poin 7, bagian 4 (frontend), bagian 5.
 
 Jika isi file ini bertentangan dengan dokumen di `markdown/`, hentikan pekerjaan dan tanyakan dulu.
 
 ## LANGKAH AWAL
 
 1. Commit TERPISAH perubahan milik pemilik proyek (`markdown/ketentuan.md`) dengan pesan `docs: update phase instructions`. Jangan mengubah isinya.
-2. Pastikan `php artisan test` hijau dan `npm run build` serta `npm run lint` di `frontend/` lulus sebelum mulai.
-3. Baca bentuk respons asli backend untuk `GET /api/items`, `POST /api/orders`, `GET /api/orders`, `GET /api/orders/{id}` (lihat `ItemResource`, `OrderResource`, dan tes `CheckoutTest`/`OrderHistoryTest`). Jangan menebak nama field. Laporkan temuannya.
+2. Pastikan `php artisan test`, `npm run lint`, dan `npm run build` lulus sebelum mulai.
+3. Jalankan `git grep -n "demo-password"` dan laporkan hasilnya. Tidak boleh ada kata sandi di source code (RULES bagian 6). Jika ada, hapus dan commit `fix: remove hardcoded password`.
+4. Perbaiki ketidaksesuaian kecil di `REQUIREMENTS.md` bagian 7: contoh pesan error 409 harus sama persis dengan kode ("Stok tidak mencukupi untuk satu atau beberapa barang."). Hanya satu baris itu. Commit `docs: align 409 message with code`.
+5. **Cek kontrak API asli SEBELUM menulis klien** (jangan menebak). Dengan token ADMIN lewat `curl`, tampilkan bentuk respons dan nama field untuk: `POST /items`, `PUT /items/{id}`, `POST /items/{id}/restock`, `POST /items/{id}/stock-opname` (termasuk kasus selisih 0 dengan `movement: null`), `GET /items/{id}/movements`, `GET /reports/sales?from&to`, dan contoh error 422 untuk `POST /items` dengan SKU duplikat. Ringkas temuannya di laporan.
 
 ## KEPUTUSAN DESAIN (sudah ditetapkan, ikuti dan sebutkan di laporan)
 
-1. **Klien tidak pernah menjadi sumber kebenaran harga, total, atau stok.** Payload checkout hanya berisi `payment_method`, `amount_paid` (hanya untuk CASH), dan `items[{item_id, quantity}]`. Dilarang mengirim harga, total, channel, atau role. Total yang tampil sebelum checkout diberi label "Total (perkiraan)". Setelah sukses, tampilkan angka dari **respons server**, bukan hitungan klien.
-2. **Klien tidak memblokir aturan bisnis; server yang memutuskan.** Tombol checkout hanya dinonaktifkan bila: keranjang kosong, CASH tanpa `amount_paid` terisi, atau request sedang berjalan. Kuantitas yang melebihi stok yang sedang tampil dan uang yang kurang dari perkiraan total hanya diberi **peringatan visual**, tetapi tetap boleh dikirim. Alasan: data stok di layar bisa basi, dan demo harus bisa menunjukkan penolakan dari server (409 dan 422). Batas UX yang BOLEH memblokir: kuantitas 1..1000 (dijepit ke rentang itu) dan maksimal 50 baris keranjang (tampilkan pesan).
-3. **Keranjang tidak pernah dihapus saat checkout gagal.** Keranjang hanya dikosongkan setelah sukses.
-4. **Anti klik ganda dua lapis:** state `submitting` yang menonaktifkan tombol, DAN `useRef` penjaga yang menolak panggilan kedua sebelum state sempat dirender ulang.
-5. **Hasil tak pasti saat jaringan putus:** karena tidak ada idempotency key, jika terjadi `NETWORK_ERROR` pada checkout, tampilkan: "Koneksi terputus. Periksa halaman Transaksi sebelum mengulang agar tidak tercatat dua kali." Keranjang tetap dipertahankan.
-6. **Data stok dimuat ulang** (`GET /items`) saat halaman dibuka, setelah checkout sukses, dan setelah checkout gagal 409/404. Sediakan tombol "Muat ulang stok".
-7. **Pencarian di POS** adalah filter sisi klien atas daftar yang sudah dimuat (nama atau SKU, tidak sensitif huruf besar-kecil). Tanpa pagination dan tanpa pencarian ke server.
-8. **Tanpa dependency baru.** CSS biasa. Tanpa test framework baru.
+1. **Prinsip sama dengan 8B:** klien bukan sumber kebenaran, tidak memblokir aturan bisnis kecuali batas UX yang disebut jelas. Pesan error server (termasuk `fieldErrors` per field) selalu ditampilkan. Semua pemanggilan API hanya lewat `src/api/`.
+2. **Anti klik ganda** untuk SEMUA form dan tombol yang mengubah data (checkout anggota, tambah/ubah barang, restock, opname). Buat hook `useSubmitGuard` (state `submitting` dan `useRef` penjaga) untuk halaman baru. Jangan merombak `PosPage` yang sudah berfungsi.
+3. **Katalog anggota (BR-09):** metode pembayaran hanya `TRANSFER` (tanpa pilihan CASH, tanpa input uang). Tampilkan catatan singkat: "Pesanan langsung tercatat dan stok berkurang. Pembayaran dicatat sebagai transfer." Tanpa reservasi dan tanpa batas waktu bayar.
+4. **Ubah barang tidak mengubah stok.** Form ubah hanya `sku`, `name`, `price`. Stok ditampilkan read-only dengan petunjuk "Ubah stok lewat menu Stok". Stok awal hanya ada di form tambah.
+5. **Opname meminta konfirmasi** sebelum dikirim (`window.confirm`) dengan ringkasan: stok sistem saat ini, stok fisik yang diinput, dan selisihnya. Restock tanpa konfirmasi.
+6. **Opname selisih 0:** respons `movement: null`. Tampilkan pesan "Stok sudah sesuai, tidak ada perubahan." (bukan error).
+7. **Laporan:** kirim selalu `from` dan `to` eksplisit (jangan mengandalkan default server). Default isian = hari ini pada `VITE_BUSINESS_TIMEZONE`. Validasi UX: `from <= to` dan rentang maksimal 366 hari. Pesan error server tetap ditampilkan.
+8. **Label bahasa Indonesia** untuk nilai enum, disimpan terpusat di `utils/labels.js`: channel (`POS` = "Kasir", `ONLINE` = "Online"), pembayaran (`CASH` = "Tunai", `TRANSFER` = "Transfer"), tipe mutasi (`SALE_POS` = "Penjualan Kasir", `SALE_ONLINE` = "Penjualan Online", `RESTOCK` = "Restock", `OPNAME` = "Stock Opname"). Nilai asli dari API tetap dipakai untuk logika.
+9. **Tanpa dependency baru, tanpa test framework baru.** CSS biasa.
 
-## FASE 8B
+## FASE 8C
 
 ### Struktur yang ditambahkan
 ```text
 frontend/src/
 ├── api/
-│   ├── items.js          # listItems
-│   └── orders.js         # checkout, listOrders, getOrder
+│   ├── items.js          # tambah: createItem, updateItem (listItems sudah ada)
+│   ├── stock.js          # restock, opname, listMovements
+│   └── reports.js        # salesReport
 ├── hooks/
-│   └── useCart.js        # state keranjang (dipakai ulang di 8C untuk katalog anggota)
+│   └── useSubmitGuard.js
 ├── components/
-│   ├── CartTable.jsx     # baris keranjang, ubah jumlah, hapus (dipakai ulang di 8C)
-│   ├── ErrorAlert.jsx    # tampil error API seragam, role="alert"
-│   └── StockShortageAlert.jsx   # daftar barang stok kurang dari 409
+│   ├── ItemPicker.jsx    # daftar barang + pencarian (diekstrak dari PosPage)
+│   └── SuccessPanel.jsx  # hanya bila memang mengurangi duplikasi
 ├── utils/
-│   └── checkout.js       # buildCheckoutPayload (murni, tanpa efek samping)
+│   └── labels.js
 └── pages/
-    ├── PosPage.jsx
-    ├── OrdersPage.jsx
-    └── ReceiptPage.jsx
+    ├── CatalogPage.jsx
+    ├── AdminItemsPage.jsx
+    ├── AdminStockPage.jsx
+    └── AdminReportPage.jsx
 ```
-Ganti rute `/pos`, `/orders`, `/orders/:id` dari `Placeholder` ke halaman nyata. Jangan menyentuh rute 8C. Jangan membuat modul API untuk stok, laporan, atau pembuatan barang.
+Ganti rute `/catalog`, `/admin/items`, `/admin/stock`, `/admin/reports` dari `Placeholder` ke halaman nyata. Setelah semua rute memakai halaman nyata, **hapus `Placeholder.jsx`** jika tidak terpakai lagi (tanpa kode mati).
 
-### `utils/checkout.js` - `buildCheckoutPayload(lines, paymentMethod, amountPaid)`
-Fungsi murni. Keluaran: `{ payment_method, items: [{item_id, quantity}], amount_paid? }`. `amount_paid` HANYA disertakan jika `payment_method === "CASH"` dan berupa integer. Tidak boleh ada field harga atau total.
+Ekstraksi `ItemPicker` dari `PosPage` boleh dilakukan HANYA jika perilaku POS tetap identik (cari, stok habis nonaktif, klik menambah ke keranjang). Lakukan di commit terpisah lebih dulu: `refactor(frontend): extract ItemPicker`, dan pastikan lint dan build lulus. Jika ragu, duplikasikan sebagian kecil markup daripada mengubah POS.
 
-### `hooks/useCart.js`
-- Baris: `{ itemId, sku, name, price, quantity }` (harga hanya untuk tampilan perkiraan).
-- Fungsi: `add(item)` (barang yang sama menambah kuantitas), `setQuantity(itemId, qty)` (dijepit 1..1000), `remove(itemId)`, `clear()`, serta nilai turunan `lines`, `lineCount`, `estimatedTotal`.
-- Tolak penambahan baris ke-51 dan beri tahu pemanggil.
+### `CatalogPage` (`/catalog`, hanya MEMBER)
+- Pakai ulang `useCart`, `CartTable`, `ErrorAlert`, `StockShortageAlert`, `buildCheckoutPayload`, dan pola pemuatan ulang stok dari `PosPage`.
+- Daftar barang dengan pencarian (nama atau SKU), tampilan nama, SKU, harga, stok. Stok 0 = "Habis" dan tombol tambah nonaktif.
+- Keranjang dan tombol "Pesan Sekarang" sesuai keputusan nomor 3. Payload: `payment_method = "TRANSFER"` dan `items`, tanpa `amount_paid` dan tanpa harga.
+- Setelah sukses (201): panel hasil dari respons server (kode, total, jumlah barang), tombol "Lihat Struk" (`/orders/:id`), "Pesanan Saya" (`/orders`), "Belanja Lagi". Kosongkan keranjang, muat ulang stok.
+- Penanganan error sama seperti POS: 409 (daftar semua barang kurang, baris disorot, keranjang tetap, stok dimuat ulang), 404 (barang tidak ditemukan), 422 lainnya, `NETWORK_ERROR` dengan pesan: "Koneksi terputus. Periksa halaman Pesanan Saya sebelum mengulang agar tidak tercatat dua kali."
 
-### `PosPage` (`/pos`, hanya CASHIER)
-Tata letak dua panel (satu kolom di layar sempit):
-- **Kiri, daftar barang:** kolom pencarian, daftar nama, SKU, harga, stok. Stok 0 menampilkan "Habis" dan tombol tambah dinonaktifkan. Klik menambah ke keranjang.
-- **Kanan, keranjang dan pembayaran:**
-  - `CartTable` dengan kontrol jumlah dan hapus. Baris yang kuantitasnya melebihi stok yang sedang tampil diberi peringatan "Melebihi stok tampil (n)" tetapi tetap bisa diproses.
-  - Pilihan metode: `CASH` (default) atau `TRANSFER`.
-  - CASH: input `amount_paid` (angka bulat >= 0). Tampilkan perkiraan kembalian, atau peringatan "Uang kurang dari perkiraan total" bila kurang. TRANSFER: tanpa input uang.
-  - Tombol "Checkout" sesuai keputusan nomor 2 dan 4.
-- **Setelah sukses (201):** tampilkan panel hasil dari respons server (kode, total, dibayar, kembalian, jumlah barang), tombol "Lihat Struk" (`/orders/:id`) dan "Transaksi Baru". Kosongkan keranjang dan reset input pembayaran, muat ulang stok.
-- **Penanganan error** (semua lewat `parseApiError`, keranjang tetap):
-  - `409 INSUFFICIENT_STOCK`: tampilkan `StockShortageAlert` yang mendaftar SEMUA barang di `details` (nama, diminta, tersedia). Baris keranjang terkait disorot. Muat ulang stok.
-  - `404 NOT_FOUND` dengan `details.item_ids`: pesan bahwa ada barang yang tidak ditemukan, sorot barangnya jika masih ada di keranjang, muat ulang stok.
-  - `422 INSUFFICIENT_PAYMENT`: tampilkan pesan server beserta `total_amount` dan `amount_paid` dari `details`.
-  - `422 VALIDATION_ERROR` lainnya: tampilkan pesan server dan `fieldErrors` bila ada.
-  - `NETWORK_ERROR`: keputusan nomor 5.
-  - Lainnya: pesan umum dari `parseApiError`, tanpa data mentah.
-- Alert error hilang saat pengguna mengubah keranjang atau memulai checkout baru.
+### `AdminItemsPage` (`/admin/items`, hanya ADMIN)
+- Tabel barang: SKU, nama, harga, stok, tombol "Ubah". Tombol "Tambah Barang".
+- Form tambah/ubah sebagai panel inline di halaman (bukan modal berlapis): tambah = `sku`, `name`, `price`, `stock` (stok awal >= 0). Ubah = `sku`, `name`, `price` (stok read-only).
+- Error 422 ditampilkan per field (misalnya SKU duplikat di field SKU). Isi form tidak hilang saat error.
+- Setelah sukses: tutup form, muat ulang daftar, tampilkan pesan sukses singkat. Tanpa hapus barang (di luar ruang lingkup).
+- Angka harga dan stok dikirim sebagai integer.
 
-### `OrdersPage` (`/orders`, semua role)
-- `GET /orders`. Judul "Pesanan Saya" untuk MEMBER, "Riwayat Transaksi" untuk CASHIER dan ADMIN.
-- Kolom: kode, waktu (`formatDateTime`), channel (POS/ONLINE), metode pembayaran, total (`formatRupiah`), dan nama pelaku (hanya untuk CASHIER dan ADMIN). Baris menautkan ke `/orders/:id`.
-- Keadaan: memuat, kosong ("Belum ada transaksi"), error dengan tombol coba lagi. Tanpa pagination (backend mengembalikan semua).
+### `AdminStockPage` (`/admin/stock`, hanya ADMIN)
+- Pilih barang dari daftar (dropdown atau daftar yang bisa dicari). Tampilkan stok saat ini.
+- Form **Restock**: `quantity` (integer >= 1), `note` opsional (maksimal 255).
+- Form **Opname**: `actual_stock` (integer >= 0), `note` opsional, dengan konfirmasi (keputusan nomor 5) dan penanganan selisih 0 (keputusan nomor 6).
+- Tabel **Riwayat mutasi** barang terpilih (terbaru di atas, dari server): waktu (`formatDateTime`), tipe (label Indonesia), perubahan (tanda + atau -), stok sebelum dan sesudah, nama pelaku, catatan. Mutasi yang punya `order_id` menautkan ke `/orders/:id`.
+- Setelah restock/opname sukses: perbarui stok yang tampil dan muat ulang riwayat. Tampilkan pesan sukses.
 
-### `ReceiptPage` (`/orders/:id`, semua role)
-- `GET /orders/{id}`. Tampilkan: nama koperasi, kode, waktu (`formatDateTime`), nama pelaku, channel, metode pembayaran, tabel barang (nama, jumlah, harga satuan, subtotal), total, dibayar, kembalian. Untuk TRANSFER tampilkan "Transfer" dan tanpa baris kembalian.
-- 404 -> pesan "Transaksi tidak ditemukan" dengan tautan kembali ke `/orders` (MEMBER yang membuka transaksi orang lain juga mendapat 404 dari server, perlakukan sama).
-- Tombol "Cetak" memanggil `window.print()` dan tombol "Kembali".
-- CSS cetak (`@media print`): sembunyikan header, navigasi, dan tombol. Struk berukuran sempit (sekitar lebar kertas struk) dan rapi.
+### `AdminReportPage` (`/admin/reports`, hanya ADMIN)
+- Dua input tanggal (`type="date"`) dan tombol "Tampilkan", sesuai keputusan nomor 7.
+- Hasil: periode (dengan zona waktu), total transaksi, total pendapatan (`formatRupiah`), tabel per channel (selalu Kasir dan Online), tabel barang terlaris (nama, jumlah terjual, pendapatan).
+- Keadaan: memuat, kosong (semua 0 dan "Belum ada penjualan pada periode ini"), error server per field atau umum.
 
 ## VERIFIKASI
 
 Opencode tidak dapat melihat tampilan, jadi laporkan bukti yang bisa diperiksa:
 
 1. `npm run lint` bersih dan `npm run build` lulus (tampilkan ringkasan).
-2. Bukti payload tidak memuat harga: jalankan skrip Node satu kali pakai (tidak di-commit) yang mengimpor `buildCheckoutPayload` dan mencetak payload untuk kasus CASH dan TRANSFER, termasuk saat `amount_paid` diisi string atau kosong. Tampilkan output.
-3. Siapkan **urutan `curl` untuk skenario HP-01 di UI** dan tulis di laporan sehingga pemilik bisa mencobanya: login sebagai kasir dan anggota, ambil `item_id` dan stok, lalu habiskan stok satu barang lewat checkout ONLINE (anggota) SETELAH keranjang kasir terisi di browser. Setelah itu pemilik menekan Checkout di POS dan harus melihat panel 409 yang mendaftar barang bermasalah dengan keranjang tetap utuh.
-4. Daftar file yang dibuat atau diubah dan tabel rute akhir.
-5. Panduan singkat cara pemilik mencoba tiap alur dan apa yang seharusnya terlihat (sukses CASH dengan kembalian, sukses TRANSFER, 409, uang kurang, klik ganda cepat, cetak struk, riwayat sebagai kasir dan sebagai anggota).
+2. Hasil cek kontrak API (langkah awal nomor 5), termasuk pengakuan jika ada yang berbeda dari dokumen.
+3. Bukti payload checkout anggota tidak memuat harga atau `amount_paid` (skrip Node sekali pakai, tidak di-commit, memakai `buildCheckoutPayload` dengan TRANSFER).
+4. Daftar file yang dibuat, diubah, dan dihapus, serta tabel rute akhir.
+5. **Daftar periksa end-to-end per role** yang akan dijalankan pemilik di browser. Tulis sebagai tabel (langkah, hasil yang diharapkan) untuk ADMIN, CASHIER, dan MEMBER, mencakup: login dan navigasi, tambah dan ubah barang, restock dan opname (termasuk selisih 0), riwayat mutasi, checkout kasir (sukses dan 409), pesanan online anggota (sukses dan 409), struk dan cetak, riwayat transaksi tiap role, laporan penjualan, serta akses terlarang antar-role.
 
 ## PENUTUP
 
-Jangan menambah fitur di luar dokumen (tanpa penyesuaian otomatis jumlah ke stok, diskon, scan barcode, atau idempotency key). Setelah selesai:
+Jangan menambah fitur di luar dokumen (tanpa hapus barang, pagination, ekspor laporan, grafik, penyesuaian otomatis jumlah ke stok, pembatalan pesanan). Setelah selesai:
 
-1. Centang HANYA kotak Fase 8 `TASKS.md` yang tercakup sesi ini: `PosPage` (cari/pilih, keranjang, pembayaran, checkout, kembalian), tampilan error 409 dengan keranjang tetap, cegah klik ganda, dan `OrdersPage` serta `ReceiptPage`. Kotak lain tetap kosong.
-2. Commit `feat(frontend): add pos, receipt, and order history (phase 8b)`.
-3. Laporkan ringkasan, temuan bentuk respons backend, keputusan, asumsi, output verifikasi, dan hal yang diragukan.
+1. Centang di Fase 8 `TASKS.md` HANYA kotak yang tercakup sesi ini: `CatalogPage`, `AdminItemsPage`, `AdminStockPage`, dan `AdminReportPage`. **Jangan mencentang "Verifikasi manual alur tiap role dari ujung ke ujung"**: itu dicentang pemilik setelah mencoba di browser.
+2. Commit `feat(frontend): add catalog and admin pages (phase 8c)` (ekstraksi `ItemPicker` dan perbaikan kecil di langkah awal sudah di commit terpisah).
+3. Laporkan ringkasan, temuan kontrak API, keputusan, asumsi, output verifikasi, dan hal yang diragukan.
