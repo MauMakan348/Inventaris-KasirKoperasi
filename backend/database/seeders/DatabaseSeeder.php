@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
         $password = env('SEED_DEFAULT_PASSWORD');
 
         if (! is_string($password) || strlen($password) < 8) {
-            throw new RuntimeException('SEED_DEFAULT_PASSWORD harus berisi minimal 8 karakter.');
+            throw new \RuntimeException('SEED_DEFAULT_PASSWORD harus berisi minimal 8 karakter.');
         }
 
         $users = [
