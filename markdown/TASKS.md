@@ -108,14 +108,14 @@
 
 ## Fase 9. Pengujian Konkurensi & Verifikasi
 
-- [ ] Buat `scripts/concurrency-test.mjs` (Node.js, `Promise.all` terhadap server berjalan).
-- [ ] HP-02: stok = 1, satu request POS dan satu ONLINE bersamaan -> tepat satu 201.
-- [ ] HP-03: stok = 5, 20 request paralel qty 1 -> tepat 5 berhasil, stok akhir 0.
-- [ ] HP-04: checkout paralel dengan urutan barang berlawanan (A,B vs B,A) -> tanpa deadlock.
-- [ ] Skrip mencetak ringkasan hasil dan memverifikasi stok akhir langsung dari API.
-- [ ] Jalankan server dengan banyak worker (`PHP_CLI_SERVER_WORKERS=8 php artisan serve`) dan dokumentasikan di README.
-- [ ] Jalankan seluruh tes PHPUnit dan pastikan lulus.
-- [ ] Periksa konsistensi: jumlah `stock_movements` dan stok akhir sesuai setelah banyak transaksi.
+- [x] Buat `scripts/concurrency-test.mjs` (Node.js, `Promise.all` terhadap server berjalan).
+- [x] HP-02: stok = 1, satu request POS dan satu ONLINE bersamaan -> tepat satu 201.
+- [x] HP-03: stok = 5, 20 request paralel qty 1 -> tepat 5 berhasil, stok akhir 0.
+- [x] HP-04: checkout paralel dengan urutan barang berlawanan (A,B vs B,A) -> tanpa deadlock.
+- [x] Skrip mencetak ringkasan hasil dan memverifikasi stok akhir langsung dari API.
+- [x] Jalankan server dengan banyak worker (`PHP_CLI_SERVER_WORKERS=8 php artisan serve`) dan dokumentasikan di README.
+- [x] Jalankan seluruh tes PHPUnit dan pastikan lulus.
+- [x] Periksa konsistensi: jumlah `stock_movements` dan stok akhir sesuai setelah banyak transaksi.
 
 ## Fase 10. Dokumentasi & Persiapan Presentasi
 

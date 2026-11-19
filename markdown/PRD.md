@@ -72,6 +72,7 @@
 | HP-05 | Keranjang memuat barang yang sama dua kali (qty 2 + qty 3) dengan stok 4. | Digabung menjadi 5, ditolak 409. Stok tetap 4. |
 | HP-06 | Klien mengirim harga palsu di body. | Diabaikan. Total tetap dari harga database. |
 | HP-07 | Kegagalan paksa di tengah proses (setelah 3 barang diproses). | Rollback penuh. Stok seluruh barang kembali seperti semula. |
+| HP-08 | Stok barang A = 1000 dan B = 1. 10 checkout paralel masing-masing berisi A dan B. | Tepat 1 berhasil dan 9 gagal 409. Stok A = 999 (pengurangan yang gagal ter-rollback), B = 0, mutasi penjualan tepat 2. |
 
 ## 5. Di Luar Ruang Lingkup (Belum Ditentukan)
 
