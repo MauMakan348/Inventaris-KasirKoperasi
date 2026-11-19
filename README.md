@@ -56,7 +56,8 @@ BUSINESS_TIMEZONE=Asia/Makassar
 ```
 
 `SEED_DEFAULT_PASSWORD` wajib berisi minimal delapan karakter. Jangan commit
-`.env` atau nilai kata sandi.
+`.env` atau nilai kata sandi. Isi nilai ini sebelum menjalankan seeder; seeder
+tidak dapat berjalan jika nilainya kosong.
 
 Migrasikan dan isi data demo:
 
