@@ -142,6 +142,33 @@ Prefix seluruh endpoint: `/api`. Kolom "Akses" menunjukkan role yang diizinkan.
 |---|---|---|---|
 | GET | `/reports/sales?from=YYYY-MM-DD&to=YYYY-MM-DD` | ADMIN | Ringkasan penjualan per periode |
 
+Aturan parameter:
+
+- `from` dan `to` wajib berformat ketat `YYYY-MM-DD` dan keduanya inklusif.
+- Keduanya dihilangkan: default hari ini pada zona waktu bisnis.
+- Hanya salah satu diisi, `from` > `to`, rentang lebih dari 366 hari, atau tanggal mustahil: 422 `VALIDATION_ERROR`.
+
+Contoh respons **200**:
+
+```json
+{
+  "data": {
+    "period": { "from": "2026-11-19", "to": "2026-11-19", "timezone": "Asia/Makassar" },
+    "total_orders": 3,
+    "total_revenue": 41000,
+    "by_channel": [
+      { "channel": "POS", "total_orders": 2, "total_revenue": 30000 },
+      { "channel": "ONLINE", "total_orders": 1, "total_revenue": 11000 }
+    ],
+    "top_items": [
+      { "item_id": 1, "item_name": "Buku Tulis", "quantity_sold": 7, "revenue": 35000 }
+    ]
+  }
+}
+```
+
+`by_channel` selalu memuat `POS` dan `ONLINE`; `top_items` maksimal 10 baris.
+
 ## 6. Contoh Request
 
 **POST `/api/orders`**
