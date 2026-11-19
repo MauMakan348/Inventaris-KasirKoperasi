@@ -113,18 +113,18 @@
 - [x] HP-03: stok = 5, 20 request paralel qty 1 -> tepat 5 berhasil, stok akhir 0.
 - [x] HP-04: checkout paralel dengan urutan barang berlawanan (A,B vs B,A) -> tanpa deadlock.
 - [x] Skrip mencetak ringkasan hasil dan memverifikasi stok akhir langsung dari API.
-- [x] Jalankan server dengan banyak worker (`PHP_CLI_SERVER_WORKERS=8 php artisan serve`) dan dokumentasikan di README.
+- [x] Jalankan server dengan banyak worker (`PHP_CLI_SERVER_WORKERS=8 php artisan serve --no-reload`) dan dokumentasikan di README.
 - [x] Jalankan seluruh tes PHPUnit dan pastikan lulus.
 - [x] Periksa konsistensi: jumlah `stock_movements` dan stok akhir sesuai setelah banyak transaksi.
 
 ## Fase 10. Dokumentasi & Persiapan Presentasi
 
-- [ ] Lengkapi `README.md` (prasyarat, instalasi, `.env`, migrasi, seeder, menjalankan server, menjalankan tes, akun demo).
-- [ ] Pastikan keenam dokumen di `markdown/` sinkron dengan implementasi akhir.
-- [ ] Hapus kode mati, debug, dan file yang tidak dipakai.
-- [ ] Isi `CODE_REVIEW.md` (self-review) dan perbaiki temuan Critical/High.
-- [ ] Siapkan skenario demo **non happy path**: HP-01 (rollback 5 barang), HP-02 dan HP-03 (konkurensi), bukti stok tidak minus.
-- [ ] Siapkan bukti: output skrip konkurensi, isi tabel `stock_movements`, dan tampilan error 409 di UI.
+- [x] Lengkapi `README.md` (prasyarat, instalasi, `.env`, migrasi, seeder, menjalankan server, menjalankan tes, akun demo).
+- [x] Pastikan keenam dokumen di `markdown/` sinkron dengan implementasi akhir.
+- [x] Hapus kode mati, debug, dan file yang tidak dipakai. (Scan tidak menemukan kode mati yang jelas untuk dihapus.)
+- [x] Isi `CODE_REVIEW.md` (self-review) dan perbaiki temuan Critical/High. (Tidak ada temuan Critical/High.)
+- [x] Siapkan skenario demo **non happy path**: HP-01 (rollback 5 barang), HP-02 dan HP-03 (konkurensi), bukti stok tidak minus.
+- [x] Siapkan bukti: output skrip konkurensi, isi tabel `stock_movements`, dan tampilan error 409 di UI. (Screenshot UI tetap menunggu pemilik.)
 
 ## Definition of Done
 

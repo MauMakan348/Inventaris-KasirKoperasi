@@ -61,92 +61,63 @@ PostgreSQL (constraint, transaksi ACID, row locking)
 
 ```text
 KasirKoperasi/
-├── backend/                         # Laravel
-│   ├── app/
-│   │   ├── Enums/
-│   │   │   ├── Role.php
-│   │   │   ├── OrderChannel.php
-│   │   │   ├── PaymentMethod.php
-│   │   │   └── StockMovementType.php
-│   │   ├── Exceptions/
-│   │   │   ├── InsufficientStockException.php
-│   │   │   ├── InsufficientPaymentException.php
-│   │   │   └── ApiExceptionHandler.php
-│   │   ├── Http/
-│   │   │   ├── Controllers/Api/
-│   │   │   │   ├── AuthController.php
-│   │   │   │   ├── ItemController.php
-│   │   │   │   ├── StockController.php
-│   │   │   │   ├── OrderController.php
-│   │   │   │   └── ReportController.php
-│   │   │   ├── Middleware/EnsureRole.php
-│   │   │   ├── Requests/            # StoreItemRequest, CheckoutRequest, dst.
-│   │   │   └── Resources/           # ItemResource, OrderResource, dst.
-│   │   ├── Models/
-│   │   │   ├── User.php
-│   │   │   ├── Item.php
-│   │   │   ├── Order.php
-│   │   │   ├── OrderItem.php
-│   │   │   └── StockMovement.php
-│   │   ├── Repositories/
-│   │   │   ├── ItemRepository.php
-│   │   │   ├── OrderRepository.php
-│   │   │   ├── StockMovementRepository.php
-│   │   │   └── ReportRepository.php
-│   │   └── Services/
-│   │       ├── AuthService.php
-│   │       ├── ItemService.php
-│   │       ├── StockService.php
-│   │       ├── OrderService.php     # inti The 30% Hard Problem
-│   │       └── ReportService.php
-│   ├── database/
-│   │   ├── migrations/
-│   │   ├── factories/
-│   │   └── seeders/
+├── backend/                         # Laravel API
+│   ├── app/Enums/                   # Role, OrderChannel, PaymentMethod, StockMovementType
+│   ├── app/Exceptions/              # API dan checkout exceptions
+│   ├── app/Http/Controllers/Api/    # Auth, Item, Stock, Order, Report
+│   ├── app/Http/Middleware/EnsureRole.php
+│   ├── app/Http/Requests/           # Form requests seluruh endpoint
+│   ├── app/Http/Resources/          # Item, Order, StockMovement, User
+│   ├── app/Models/                  # User, Item, Order, OrderItem, StockMovement
+│   ├── app/Repositories/            # Item, Order, StockMovement, Report
+│   ├── app/Services/                # Auth, Item, Stock, Order, Report
+│   ├── database/migrations/
+│   ├── database/factories/
+│   ├── database/seeders/DatabaseSeeder.php
 │   ├── routes/api.php
-│   ├── tests/
-│   │   ├── Feature/
-│   │   │   ├── AuthTest.php
-│   │   │   ├── ItemTest.php
-│   │   │   ├── StockTest.php
-│   │   │   ├── CheckoutTest.php
-│   │   │   ├── CheckoutRollbackTest.php
-│   │   │   ├── OrderHistoryTest.php
-│   │   │   └── ReportTest.php
-│   │   └── Unit/
+│   ├── tests/Feature/               # Auth, RoleMiddleware, ErrorResponse, Item, Stock,
+│   │   ├── CheckoutTest.php         # Checkout, OrderHistory, Report, ItemSeeder
+│   │   └── CheckoutRollbackTest.php
+│   ├── tests/Unit/                  # Example, LockItemsForUpdate
 │   ├── .env.example
-│   └── composer.json
+│   ├── composer.json
+│   └── phpunit.xml
 ├── frontend/                        # React + Vite
-│   ├── src/
-│   │   ├── api/                     # axios instance, pemanggil endpoint
-│   │   ├── context/AuthContext.jsx
-│   │   ├── components/
-│   │   ├── pages/
-│   │   │   ├── LoginPage.jsx
-│   │   │   ├── PosPage.jsx          # kasir
-│   │   │   ├── CatalogPage.jsx      # anggota
-│   │   │   ├── OrdersPage.jsx
-│   │   │   ├── ReceiptPage.jsx
-│   │   │   ├── AdminItemsPage.jsx
-│   │   │   ├── AdminStockPage.jsx
-│   │   │   └── AdminReportPage.jsx
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   └── package.json
-├── scripts/
-│   └── concurrency-test.mjs         # bukti HP-02, HP-03, HP-04
+│   ├── src/api/                     # Axios dan seluruh pemanggil API
+│   ├── src/context/                 # AuthContext
+│   ├── src/components/              # Layout, cart, picker, alert, route, form
+│   ├── src/hooks/                   # useCart, useSubmitGuard
+│   ├── src/pages/                   # Login, register, POS, catalog, orders, admin
+│   ├── src/utils/                   # checkout, format, labels, roles
+│   ├── src/App.jsx
+│   ├── src/main.jsx
+│   ├── package.json
+│   └── .env.example
+├── scripts/concurrency-test.mjs     # bukti HP-02, HP-03, HP-04, HP-08
+├── evidence/                        # output verifikasi permanen
+│   ├── concurrency-run-clean.txt
+│   ├── concurrency-run-repeat.txt
+│   ├── concurrency-negative-control.txt
+│   ├── sql-consistency.txt
+│   ├── sample-409.json
+│   ├── sample-stock-movements.txt
+│   ├── README.md
+│   └── screenshots/.gitkeep          # tangkapan layar diisi pemilik
 ├── markdown/                        # dokumen konteks AI
 │   ├── REQUIREMENTS.md
 │   ├── PRD.md
 │   ├── ARCHITECTURE.md
 │   ├── RULES.md
 │   ├── TASKS.md
-│   └── CODE_REVIEW.md
-├── AGENTS.md                        # instruksi otomatis untuk opencode
+│   ├── CODE_REVIEW.md
+│   ├── DEMO.md
+│   ├── ketentuan.md
+│   └── prompt.txt
+├── AGENTS.md
 └── README.md
 ```
 
-Struktur ini adalah usulan. Boleh disesuaikan selama tanggung jawab lapisan dan alur bisnis tetap terjaga.
+Pohon ini mencerminkan berkas aplikasi dan bukti yang terlacak di repository.
 
 ## 5. Skema Database
 
@@ -219,8 +190,8 @@ Seluruh exception dipetakan di satu tempat (`bootstrap/app.php` atau `ApiExcepti
 
 ## 10. Catatan Lingkungan Demo
 
-- `php artisan serve` secara default hanya melayani satu request sekali jalan, sehingga tes konkurensi tidak bermakna. Jalankan dengan `PHP_CLI_SERVER_WORKERS=8 php artisan serve` (atau gunakan Nginx + PHP-FPM) saat demo.
-- Gunakan database PostgreSQL yang sama untuk demo dan skrip konkurensi. Jangan gunakan SQLite.
+- `php artisan serve` secara default hanya melayani satu request sekali jalan, sehingga tes konkurensi tidak bermakna. Jalankan dengan `PHP_CLI_SERVER_WORKERS=8 php artisan serve --no-reload` (atau gunakan Nginx + PHP-FPM) saat demo. Laravel 13 mengabaikan jumlah worker tanpa `--no-reload`.
+- Gunakan database PostgreSQL yang sama untuk demo dan skrip konkurensi. Jangan gunakan SQLite. Windows tidak mendukung `PHP_CLI_SERVER_WORKERS`; gunakan WSL, Laragon, atau Nginx + PHP-FPM.
 
 ## 11. Batasan dan Hal yang Belum Ditentukan
 
