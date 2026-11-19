@@ -1,0 +1,59 @@
+Uji konkurensi checkout Smart Koperasi
+BASE_URL: http://localhost:8000/api
+Run ID: n6baxrk5fb
+Ronde: default
+
+PENTING: server harus berjalan dengan banyak worker, misalnya:
+  PHP_CLI_SERVER_WORKERS=8 php artisan serve --no-reload --port=8000
+Laravel 13 butuh --no-reload; tanpa flag itu hanya satu server dibuat.
+php artisan serve biasa hanya melayani satu request sekali jalan sehingga uji tidak bermakna.
+Catatan Windows: PHP_CLI_SERVER_WORKERS tidak didukung; gunakan WSL, Laragon, atau Nginx + PHP-FPM.
+
+Login tiga akun...
+Login berhasil.
+
+HP-02 - Rebutan stok terakhir (POS vs ONLINE)
+HP-02 ronde 1/10: PASS | 201=1 409=1 tak terduga=0 | stok akhir A=0 | 51 ms | pemenang POS
+HP-02 ronde 2/10: PASS | 201=1 409=1 tak terduga=0 | stok akhir A=0 | 51 ms | pemenang ONLINE
+HP-02 ronde 3/10: PASS | 201=1 409=1 tak terduga=0 | stok akhir A=0 | 50 ms | pemenang POS
+HP-02 ronde 4/10: PASS | 201=1 409=1 tak terduga=0 | stok akhir A=0 | 80 ms | pemenang POS
+HP-02 ronde 5/10: PASS | 201=1 409=1 tak terduga=0 | stok akhir A=0 | 52 ms | pemenang POS
+HP-02 ronde 6/10: PASS | 201=1 409=1 tak terduga=0 | stok akhir A=0 | 47 ms | pemenang POS
+HP-02 ronde 7/10: PASS | 201=1 409=1 tak terduga=0 | stok akhir A=0 | 49 ms | pemenang ONLINE
+HP-02 ronde 8/10: PASS | 201=1 409=1 tak terduga=0 | stok akhir A=0 | 50 ms | pemenang ONLINE
+HP-02 ronde 9/10: PASS | 201=1 409=1 tak terduga=0 | stok akhir A=0 | 47 ms | pemenang ONLINE
+HP-02 ronde 10/10: PASS | 201=1 409=1 tak terduga=0 | stok akhir A=0 | 77 ms | pemenang POS
+
+HP-03 - Stok 5, 20 request paralel
+HP-03 ronde 1/5: PASS | 201=5 409=15 tak terduga=0 | stok akhir A=0 | 316 ms
+HP-03 ronde 2/5: PASS | 201=5 409=15 tak terduga=0 | stok akhir A=0 | 264 ms
+HP-03 ronde 3/5: PASS | 201=5 409=15 tak terduga=0 | stok akhir A=0 | 282 ms
+HP-03 ronde 4/5: PASS | 201=5 409=15 tak terduga=0 | stok akhir A=0 | 269 ms
+HP-03 ronde 5/5: PASS | 201=5 409=15 tak terduga=0 | stok akhir A=0 | 280 ms
+
+HP-04 - Urutan barang berlawanan (deadlock)
+HP-04 ronde 1/5: PASS | 201=20 409=0 tak terduga=0 | stok akhir A=980 B=980 | 465 ms
+HP-04 ronde 2/5: PASS | 201=20 409=0 tak terduga=0 | stok akhir A=980 B=980 | 424 ms
+HP-04 ronde 3/5: PASS | 201=20 409=0 tak terduga=0 | stok akhir A=980 B=980 | 475 ms
+HP-04 ronde 4/5: PASS | 201=20 409=0 tak terduga=0 | stok akhir A=980 B=980 | 433 ms
+HP-04 ronde 5/5: PASS | 201=20 409=0 tak terduga=0 | stok akhir A=980 B=980 | 436 ms
+
+HP-08 - All-or-Nothing di bawah beban
+HP-08 ronde 1/5: PASS | 201=1 409=9 tak terduga=0 | stok akhir A=999 B=0 | 143 ms
+HP-08 ronde 2/5: PASS | 201=1 409=9 tak terduga=0 | stok akhir A=999 B=0 | 158 ms
+HP-08 ronde 3/5: PASS | 201=1 409=9 tak terduga=0 | stok akhir A=999 B=0 | 171 ms
+HP-08 ronde 4/5: PASS | 201=1 409=9 tak terduga=0 | stok akhir A=999 B=0 | 159 ms
+HP-08 ronde 5/5: PASS | 201=1 409=9 tak terduga=0 | stok akhir A=999 B=0 | 163 ms
+
+Tabel ringkas
+| Skenario | Ronde | Lulus | Gagal | 201 | 409 | Tak terduga | Durasi total | Rata-rata |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| HP-02 | 10 | 10 | 0 | 10 | 10 | 0 | 554 ms | 55 ms |
+| HP-03 | 5 | 5 | 0 | 25 | 75 | 0 | 1412 ms | 282 ms |
+| HP-04 | 5 | 5 | 0 | 100 | 0 | 0 | 2234 ms | 447 ms |
+| HP-08 | 5 | 5 | 0 | 5 | 45 | 0 | 795 ms | 159 ms |
+
+Channel pemenang HP-02 per ronde: POS, ONLINE, POS, POS, POS, POS, ONLINE, ONLINE, ONLINE, POS
+
+Catatan: sisa barang uji dibiarkan. Reset dengan: php artisan migrate:fresh --seed
+HASIL AKHIR: SEMUA LOLOS.

@@ -1,0 +1,1 @@
+{"error":{"code":"INSUFFICIENT_STOCK","message":"Stok tidak mencukupi untuk satu atau lebih barang.","details":[{"item_id":11,"name":"Bukti stok habis A","requested":2,"available":0},{"item_id":12,"name":"Bukti stok habis B","requested":3,"available":0}]}}

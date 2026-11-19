@@ -1,0 +1,38 @@
+Perintah SQL dijalankan pada database development setelah pembuatan bukti checkout, restock, opname, dan 409.
+
+-- stok item harus sama dengan total mutasi
+SELECT i.id FROM items i
+LEFT JOIN stock_movements m ON m.item_id = i.id
+GROUP BY i.id, i.stock
+HAVING i.stock <> COALESCE(SUM(m.quantity_change), 0);
+
+-- tidak boleh ada stok negatif
+SELECT id, stock FROM items WHERE stock < 0;
+
+-- total order harus sama dengan jumlah subtotal item
+SELECT o.id FROM orders o
+JOIN order_items oi ON oi.order_id = o.id
+GROUP BY o.id, o.total_amount
+HAVING SUM(oi.subtotal) <> o.total_amount;
+
+-- mutasi penjualan harus sama dengan kuantitas order
+SELECT o.id FROM orders o
+WHERE (SELECT COALESCE(SUM(quantity), 0) FROM order_items WHERE order_id = o.id)
+   <> -(SELECT COALESCE(SUM(quantity_change), 0) FROM stock_movements WHERE order_id = o.id);
+
+Keluaran:
+ id
+----
+(0 rows)
+
+ id | stock
+----+-------
+(0 rows)
+
+ id
+----
+(0 rows)
+
+ id
+----
+(0 rows)

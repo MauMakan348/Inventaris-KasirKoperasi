@@ -1,0 +1,157 @@
+Uji konkurensi checkout Smart Koperasi
+BASE_URL: http://localhost:8000/api
+Run ID: n655bzzb9k
+Ronde: default
+
+PENTING: server harus berjalan dengan banyak worker, misalnya:
+  PHP_CLI_SERVER_WORKERS=8 php artisan serve --port=8000
+php artisan serve biasa hanya melayani satu request sekali jalan sehingga uji tidak bermakna.
+Catatan Windows: PHP_CLI_SERVER_WORKERS tidak didukung; gunakan WSL, Laragon, atau Nginx + PHP-FPM.
+
+Login tiga akun...
+Login berhasil.
+
+HP-02 - Rebutan stok terakhir (POS vs ONLINE)
+HP-02 ronde 1/10: FAIL | 201=2 409=0 tak terduga=0 | stok akhir A=0 | 64 ms | pemenang POS,ONLINE
+  kegagalan: jumlah 201 2, seharusnya 1
+  kegagalan: jumlah 409 0, seharusnya 1
+  kegagalan: A: mutasi SALE_* 2, seharusnya 1
+  kegagalan: A: jumlah quantity_change -1, seharusnya sama dengan stok akhir 0
+HP-02 ronde 2/10: FAIL | 201=2 409=0 tak terduga=0 | stok akhir A=0 | 73 ms | pemenang POS,ONLINE
+  kegagalan: jumlah 201 2, seharusnya 1
+  kegagalan: jumlah 409 0, seharusnya 1
+  kegagalan: A: mutasi SALE_* 2, seharusnya 1
+  kegagalan: A: jumlah quantity_change -1, seharusnya sama dengan stok akhir 0
+HP-02 ronde 3/10: FAIL | 201=2 409=0 tak terduga=0 | stok akhir A=0 | 53 ms | pemenang POS,ONLINE
+  kegagalan: jumlah 201 2, seharusnya 1
+  kegagalan: jumlah 409 0, seharusnya 1
+  kegagalan: A: mutasi SALE_* 2, seharusnya 1
+  kegagalan: A: jumlah quantity_change -1, seharusnya sama dengan stok akhir 0
+HP-02 ronde 4/10: FAIL | 201=2 409=0 tak terduga=0 | stok akhir A=0 | 56 ms | pemenang POS,ONLINE
+  kegagalan: jumlah 201 2, seharusnya 1
+  kegagalan: jumlah 409 0, seharusnya 1
+  kegagalan: A: mutasi SALE_* 2, seharusnya 1
+  kegagalan: A: jumlah quantity_change -1, seharusnya sama dengan stok akhir 0
+HP-02 ronde 5/10: FAIL | 201=2 409=0 tak terduga=0 | stok akhir A=0 | 60 ms | pemenang POS,ONLINE
+  kegagalan: jumlah 201 2, seharusnya 1
+  kegagalan: jumlah 409 0, seharusnya 1
+  kegagalan: A: mutasi SALE_* 2, seharusnya 1
+  kegagalan: A: jumlah quantity_change -1, seharusnya sama dengan stok akhir 0
+HP-02 ronde 6/10: PASS | 201=1 409=1 tak terduga=0 | stok akhir A=0 | 103 ms | pemenang POS
+HP-02 ronde 7/10: PASS | 201=1 409=1 tak terduga=0 | stok akhir A=0 | 83 ms | pemenang POS
+HP-02 ronde 8/10: PASS | 201=1 409=1 tak terduga=0 | stok akhir A=0 | 78 ms | pemenang POS
+HP-02 ronde 9/10: FAIL | 201=2 409=0 tak terduga=0 | stok akhir A=0 | 53 ms | pemenang POS,ONLINE
+  kegagalan: jumlah 201 2, seharusnya 1
+  kegagalan: jumlah 409 0, seharusnya 1
+  kegagalan: A: mutasi SALE_* 2, seharusnya 1
+  kegagalan: A: jumlah quantity_change -1, seharusnya sama dengan stok akhir 0
+HP-02 ronde 10/10: FAIL | 201=2 409=0 tak terduga=0 | stok akhir A=0 | 52 ms | pemenang POS,ONLINE
+  kegagalan: jumlah 201 2, seharusnya 1
+  kegagalan: jumlah 409 0, seharusnya 1
+  kegagalan: A: mutasi SALE_* 2, seharusnya 1
+  kegagalan: A: jumlah quantity_change -1, seharusnya sama dengan stok akhir 0
+
+HP-03 - Stok 5, 20 request paralel
+HP-03 ronde 1/5: FAIL | 201=15 409=5 tak terduga=0 | stok akhir A=0 | 292 ms
+  kegagalan: jumlah 201 15, seharusnya 5
+  kegagalan: jumlah 409 5, seharusnya 15
+  kegagalan: A: mutasi SALE_* 15, seharusnya 5
+  kegagalan: A: jumlah quantity_change -10, seharusnya sama dengan stok akhir 0
+HP-03 ronde 2/5: FAIL | 201=14 409=6 tak terduga=0 | stok akhir A=0 | 295 ms
+  kegagalan: jumlah 201 14, seharusnya 5
+  kegagalan: jumlah 409 6, seharusnya 15
+  kegagalan: A: mutasi SALE_* 14, seharusnya 5
+  kegagalan: A: jumlah quantity_change -9, seharusnya sama dengan stok akhir 0
+HP-03 ronde 3/5: FAIL | 201=14 409=6 tak terduga=0 | stok akhir A=0 | 267 ms
+  kegagalan: jumlah 201 14, seharusnya 5
+  kegagalan: jumlah 409 6, seharusnya 15
+  kegagalan: A: mutasi SALE_* 14, seharusnya 5
+  kegagalan: A: jumlah quantity_change -9, seharusnya sama dengan stok akhir 0
+HP-03 ronde 4/5: FAIL | 201=16 409=4 tak terduga=0 | stok akhir A=0 | 316 ms
+  kegagalan: jumlah 201 16, seharusnya 5
+  kegagalan: jumlah 409 4, seharusnya 15
+  kegagalan: A: mutasi SALE_* 16, seharusnya 5
+  kegagalan: A: jumlah quantity_change -11, seharusnya sama dengan stok akhir 0
+HP-03 ronde 5/5: FAIL | 201=15 409=5 tak terduga=0 | stok akhir A=0 | 271 ms
+  kegagalan: jumlah 201 15, seharusnya 5
+  kegagalan: jumlah 409 5, seharusnya 15
+  kegagalan: A: mutasi SALE_* 15, seharusnya 5
+  kegagalan: A: jumlah quantity_change -10, seharusnya sama dengan stok akhir 0
+
+HP-04 - Urutan barang berlawanan (deadlock)
+HP-04 ronde 1/5: FAIL | 201=20 409=0 tak terduga=0 | stok akhir A=993 B=993 | 324 ms
+  kegagalan: A: stok akhir 993, seharusnya 980
+  kegagalan: A: jumlah quantity_change 980, seharusnya sama dengan stok akhir 993
+  kegagalan: B: stok akhir 993, seharusnya 980
+  kegagalan: B: jumlah quantity_change 980, seharusnya sama dengan stok akhir 993
+HP-04 ronde 2/5: FAIL | 201=20 409=0 tak terduga=0 | stok akhir A=992 B=992 | 412 ms
+  kegagalan: A: stok akhir 992, seharusnya 980
+  kegagalan: A: jumlah quantity_change 980, seharusnya sama dengan stok akhir 992
+  kegagalan: B: stok akhir 992, seharusnya 980
+  kegagalan: B: jumlah quantity_change 980, seharusnya sama dengan stok akhir 992
+HP-04 ronde 3/5: FAIL | 201=20 409=0 tak terduga=0 | stok akhir A=992 B=992 | 399 ms
+  kegagalan: A: stok akhir 992, seharusnya 980
+  kegagalan: A: jumlah quantity_change 980, seharusnya sama dengan stok akhir 992
+  kegagalan: B: stok akhir 992, seharusnya 980
+  kegagalan: B: jumlah quantity_change 980, seharusnya sama dengan stok akhir 992
+HP-04 ronde 4/5: FAIL | 201=20 409=0 tak terduga=0 | stok akhir A=994 B=994 | 324 ms
+  kegagalan: A: stok akhir 994, seharusnya 980
+  kegagalan: A: jumlah quantity_change 980, seharusnya sama dengan stok akhir 994
+  kegagalan: B: stok akhir 994, seharusnya 980
+  kegagalan: B: jumlah quantity_change 980, seharusnya sama dengan stok akhir 994
+HP-04 ronde 5/5: FAIL | 201=20 409=0 tak terduga=0 | stok akhir A=992 B=992 | 365 ms
+  kegagalan: A: stok akhir 992, seharusnya 980
+  kegagalan: A: jumlah quantity_change 980, seharusnya sama dengan stok akhir 992
+  kegagalan: B: stok akhir 992, seharusnya 980
+  kegagalan: B: jumlah quantity_change 980, seharusnya sama dengan stok akhir 992
+
+HP-08 - All-or-Nothing di bawah beban
+HP-08 ronde 1/5: FAIL | 201=5 409=5 tak terduga=0 | stok akhir A=999 B=0 | 164 ms
+  kegagalan: jumlah 201 5, seharusnya 1
+  kegagalan: jumlah 409 5, seharusnya 9
+  kegagalan: A: mutasi SALE_* 5, seharusnya 1
+  kegagalan: A: jumlah quantity_change 995, seharusnya sama dengan stok akhir 999
+  kegagalan: B: mutasi SALE_* 5, seharusnya 1
+  kegagalan: B: jumlah quantity_change -4, seharusnya sama dengan stok akhir 0
+HP-08 ronde 2/5: FAIL | 201=5 409=5 tak terduga=0 | stok akhir A=999 B=0 | 170 ms
+  kegagalan: jumlah 201 5, seharusnya 1
+  kegagalan: jumlah 409 5, seharusnya 9
+  kegagalan: A: mutasi SALE_* 5, seharusnya 1
+  kegagalan: A: jumlah quantity_change 995, seharusnya sama dengan stok akhir 999
+  kegagalan: B: mutasi SALE_* 5, seharusnya 1
+  kegagalan: B: jumlah quantity_change -4, seharusnya sama dengan stok akhir 0
+HP-08 ronde 3/5: FAIL | 201=5 409=5 tak terduga=0 | stok akhir A=999 B=0 | 163 ms
+  kegagalan: jumlah 201 5, seharusnya 1
+  kegagalan: jumlah 409 5, seharusnya 9
+  kegagalan: A: mutasi SALE_* 5, seharusnya 1
+  kegagalan: A: jumlah quantity_change 995, seharusnya sama dengan stok akhir 999
+  kegagalan: B: mutasi SALE_* 5, seharusnya 1
+  kegagalan: B: jumlah quantity_change -4, seharusnya sama dengan stok akhir 0
+HP-08 ronde 4/5: FAIL | 201=3 409=7 tak terduga=0 | stok akhir A=999 B=0 | 183 ms
+  kegagalan: jumlah 201 3, seharusnya 1
+  kegagalan: jumlah 409 7, seharusnya 9
+  kegagalan: A: mutasi SALE_* 3, seharusnya 1
+  kegagalan: A: jumlah quantity_change 997, seharusnya sama dengan stok akhir 999
+  kegagalan: B: mutasi SALE_* 3, seharusnya 1
+  kegagalan: B: jumlah quantity_change -2, seharusnya sama dengan stok akhir 0
+HP-08 ronde 5/5: FAIL | 201=4 409=6 tak terduga=0 | stok akhir A=999 B=0 | 206 ms
+  kegagalan: jumlah 201 4, seharusnya 1
+  kegagalan: jumlah 409 6, seharusnya 9
+  kegagalan: A: mutasi SALE_* 4, seharusnya 1
+  kegagalan: A: jumlah quantity_change 996, seharusnya sama dengan stok akhir 999
+  kegagalan: B: mutasi SALE_* 4, seharusnya 1
+  kegagalan: B: jumlah quantity_change -3, seharusnya sama dengan stok akhir 0
+
+Tabel ringkas
+| Skenario | Ronde | Lulus | Gagal | 201 | 409 | Tak terduga | Durasi total | Rata-rata |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| HP-02 | 10 | 3 | 7 | 17 | 3 | 0 | 676 ms | 68 ms |
+| HP-03 | 5 | 0 | 5 | 74 | 26 | 0 | 1441 ms | 288 ms |
+| HP-04 | 5 | 0 | 5 | 100 | 0 | 0 | 1824 ms | 365 ms |
+| HP-08 | 5 | 0 | 5 | 22 | 28 | 0 | 886 ms | 177 ms |
+
+Channel pemenang HP-02 per ronde: POS,ONLINE, POS,ONLINE, POS,ONLINE, POS,ONLINE, POS,ONLINE, POS, POS, POS, POS,ONLINE, POS,ONLINE
+
+Catatan: sisa barang uji dibiarkan. Reset dengan: php artisan migrate:fresh --seed
+
+HASIL AKHIR: GAGAL. Ada ronde yang tidak memenuhi harapan.
