@@ -6,7 +6,10 @@ import ProtectedRoute from './components/ProtectedRoute'
 import { useAuth } from './context/useAuth'
 import LoginPage from './pages/LoginPage'
 import NotFoundPage from './pages/NotFoundPage'
+import OrdersPage from './pages/OrdersPage'
 import Placeholder from './pages/Placeholder'
+import PosPage from './pages/PosPage'
+import ReceiptPage from './pages/ReceiptPage'
 import RegisterPage from './pages/RegisterPage'
 import { homePathForRole } from './utils/roles'
 
@@ -62,7 +65,7 @@ function App() {
             path="/pos"
             element={
               <ProtectedRoute roles={['CASHIER']}>
-                <Placeholder title="Kasir" description="Halaman kasir (POS) akan dibuat pada sesi 8B." />
+                <PosPage />
               </ProtectedRoute>
             }
           />
@@ -74,18 +77,8 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/orders"
-            element={
-              <Placeholder title="Transaksi" description="Daftar transaksi akan dibuat pada sesi 8B." />
-            }
-          />
-          <Route
-            path="/orders/:id"
-            element={
-              <Placeholder title="Detail Transaksi" description="Struk transaksi akan dibuat pada sesi 8B." />
-            }
-          />
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/orders/:id" element={<ReceiptPage />} />
           <Route
             path="/admin/items"
             element={

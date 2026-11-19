@@ -97,11 +97,11 @@
 - [x] Siapkan instance Axios (base URL dari env, header token) dan `AuthContext`.
 - [x] Buat `ProtectedRoute` berbasis role dan navigasi per role.
 - [x] `LoginPage` dan registrasi anggota.
-- [ ] `PosPage` (kasir): cari/pilih barang, keranjang, input pembayaran, tombol checkout, tampilkan kembalian.
-- [ ] Tampilkan error 409 dengan daftar barang yang stoknya kurang (mudah dibaca). Keranjang tidak dihapus saat gagal.
-- [ ] Cegah klik ganda pada tombol checkout (disable saat request berjalan).
+- [x] `PosPage` (kasir): cari/pilih barang, keranjang, input pembayaran, tombol checkout, tampilkan kembalian.
+- [x] Tampilkan error 409 dengan daftar barang yang stoknya kurang (mudah dibaca). Keranjang tidak dihapus saat gagal.
+- [x] Cegah klik ganda pada tombol checkout (disable saat request berjalan).
 - [ ] `CatalogPage` (anggota): katalog, keranjang, pesan online.
-- [ ] `OrdersPage` dan `ReceiptPage` (struk dapat dicetak dengan `window.print()`).
+- [x] `OrdersPage` dan `ReceiptPage` (struk dapat dicetak dengan `window.print()`).
 - [ ] `AdminItemsPage` (tambah/ubah barang), `AdminStockPage` (restock, opname, riwayat mutasi).
 - [ ] `AdminReportPage` (laporan penjualan dengan filter tanggal).
 - [ ] Verifikasi manual alur tiap role dari ujung ke ujung.
