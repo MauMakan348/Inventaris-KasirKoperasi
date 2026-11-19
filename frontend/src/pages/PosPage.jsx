@@ -5,7 +5,7 @@ import { listItems } from '../api/items'
 import { checkout as submitOrder } from '../api/orders'
 import CartTable from '../components/CartTable'
 import ErrorAlert from '../components/ErrorAlert'
-import Loading from '../components/Loading'
+import ItemPicker from '../components/ItemPicker'
 import StockShortageAlert from '../components/StockShortageAlert'
 import { useCart } from '../hooks/useCart'
 import { buildCheckoutPayload } from '../utils/checkout'
@@ -60,7 +60,6 @@ export default function PosPage() {
   const [items, setItems] = useState([])
   const [itemsLoading, setItemsLoading] = useState(true)
   const [itemsError, setItemsError] = useState(null)
-  const [search, setSearch] = useState('')
 
   const [paymentMethod, setPaymentMethod] = useState('CASH')
   const [amountPaid, setAmountPaid] = useState('')
@@ -118,19 +117,6 @@ export default function PosPage() {
     () => Object.fromEntries(items.map((item) => [item.id, item.stock])),
     [items],
   )
-
-  const filteredItems = useMemo(() => {
-    const term = search.trim().toLowerCase()
-
-    if (term === '') {
-      return items
-    }
-
-    return items.filter(
-      (item) =>
-        item.name.toLowerCase().includes(term) || item.sku.toLowerCase().includes(term),
-    )
-  }, [items, search])
 
   const highlightedIds = useMemo(() => {
     if (!checkoutError) {
@@ -233,61 +219,13 @@ export default function PosPage() {
 
   return (
     <div className="pos-layout">
-      <section className="panel">
-        <div className="panel-head">
-          <h2>Daftar Barang</h2>
-          <button className="btn btn-ghost btn-small" type="button" onClick={reloadItems} disabled={itemsLoading}>
-            {itemsLoading ? 'Memuat...' : 'Muat ulang stok'}
-          </button>
-        </div>
-
-        <label className="sr-only" htmlFor="item-search">
-          Cari barang
-        </label>
-        <input
-          id="item-search"
-          className="search-input"
-          type="search"
-          placeholder="Cari nama atau SKU"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-        />
-
-        {itemsLoading && <Loading label="Memuat barang..." />}
-        {itemsError && (
-          <ErrorAlert error={itemsError}>
-            <button className="btn btn-ghost btn-small" type="button" onClick={reloadItems}>
-              Coba lagi
-            </button>
-          </ErrorAlert>
-        )}
-
-        {!itemsLoading && !itemsError && filteredItems.length === 0 && (
-          <p className="muted-text">Tidak ada barang yang cocok.</p>
-        )}
-
-        <ul className="item-list">
-          {filteredItems.map((item) => (
-            <li className="item-card" key={item.id}>
-              <div>
-                <p className="item-name">{item.name}</p>
-                <p className="item-meta">
-                  {item.sku} &middot; {formatRupiah(item.price)} &middot;{' '}
-                  {item.stock > 0 ? `Stok: ${item.stock}` : 'Habis'}
-                </p>
-              </div>
-              <button
-                className="btn btn-primary btn-small"
-                type="button"
-                disabled={item.stock <= 0}
-                onClick={() => handleAdd(item)}
-              >
-                Tambah
-              </button>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <ItemPicker
+        items={items}
+        loading={itemsLoading}
+        error={itemsError}
+        onReload={reloadItems}
+        onAdd={handleAdd}
+      />
 
       {success ? (
         <CheckoutResult order={success} onNewTransaction={() => setSuccess(null)} />
