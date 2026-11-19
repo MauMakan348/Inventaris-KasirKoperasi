@@ -5,6 +5,7 @@ import { getOrder } from '../api/orders'
 import ErrorAlert from '../components/ErrorAlert'
 import Loading from '../components/Loading'
 import { formatDateTime, formatRupiah } from '../utils/format'
+import { CHANNEL_LABELS, labelFor, PAYMENT_METHOD_LABELS } from '../utils/labels'
 
 export default function ReceiptPage() {
   const { id } = useParams()
@@ -118,11 +119,11 @@ export default function ReceiptPage() {
           </div>
           <div>
             <dt>Channel</dt>
-            <dd>{order.channel}</dd>
+            <dd>{labelFor(CHANNEL_LABELS, order.channel)}</dd>
           </div>
           <div>
             <dt>Pembayaran</dt>
-            <dd>{isTransfer ? 'Transfer' : 'Tunai'}</dd>
+            <dd>{labelFor(PAYMENT_METHOD_LABELS, order.payment_method)}</dd>
           </div>
         </dl>
 

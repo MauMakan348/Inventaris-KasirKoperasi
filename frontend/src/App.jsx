@@ -4,10 +4,13 @@ import AppLayout from './components/AppLayout'
 import Loading from './components/Loading'
 import ProtectedRoute from './components/ProtectedRoute'
 import { useAuth } from './context/useAuth'
+import AdminItemsPage from './pages/AdminItemsPage'
+import AdminReportPage from './pages/AdminReportPage'
+import AdminStockPage from './pages/AdminStockPage'
+import CatalogPage from './pages/CatalogPage'
 import LoginPage from './pages/LoginPage'
 import NotFoundPage from './pages/NotFoundPage'
 import OrdersPage from './pages/OrdersPage'
-import Placeholder from './pages/Placeholder'
 import PosPage from './pages/PosPage'
 import ReceiptPage from './pages/ReceiptPage'
 import RegisterPage from './pages/RegisterPage'
@@ -73,7 +76,7 @@ function App() {
             path="/catalog"
             element={
               <ProtectedRoute roles={['MEMBER']}>
-                <Placeholder title="Katalog" description="Katalog anggota akan dibuat pada sesi 8C." />
+                <CatalogPage />
               </ProtectedRoute>
             }
           />
@@ -83,7 +86,7 @@ function App() {
             path="/admin/items"
             element={
               <ProtectedRoute roles={['ADMIN']}>
-                <Placeholder title="Barang" description="Pengelolaan barang akan dibuat pada sesi 8C." />
+                <AdminItemsPage />
               </ProtectedRoute>
             }
           />
@@ -91,7 +94,7 @@ function App() {
             path="/admin/stock"
             element={
               <ProtectedRoute roles={['ADMIN']}>
-                <Placeholder title="Stok" description="Restock dan opname akan dibuat pada sesi 8C." />
+                <AdminStockPage />
               </ProtectedRoute>
             }
           />
@@ -99,7 +102,7 @@ function App() {
             path="/admin/reports"
             element={
               <ProtectedRoute roles={['ADMIN']}>
-                <Placeholder title="Laporan" description="Laporan penjualan akan dibuat pada sesi 8C." />
+                <AdminReportPage />
               </ProtectedRoute>
             }
           />

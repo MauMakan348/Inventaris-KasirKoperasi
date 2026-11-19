@@ -6,6 +6,7 @@ import ErrorAlert from '../components/ErrorAlert'
 import Loading from '../components/Loading'
 import { useAuth } from '../context/useAuth'
 import { formatDateTime, formatRupiah } from '../utils/format'
+import { CHANNEL_LABELS, labelFor, PAYMENT_METHOD_LABELS } from '../utils/labels'
 
 export default function OrdersPage() {
   const { user } = useAuth()
@@ -106,8 +107,8 @@ export default function OrdersPage() {
                     </Link>
                   </td>
                   <td>{formatDateTime(order.created_at)}</td>
-                  <td>{order.channel}</td>
-                  <td>{order.payment_method}</td>
+                  <td>{labelFor(CHANNEL_LABELS, order.channel)}</td>
+                  <td>{labelFor(PAYMENT_METHOD_LABELS, order.payment_method)}</td>
                   <td>{formatRupiah(order.total_amount)}</td>
                   {!isMember && <td>{order.user?.name}</td>}
                 </tr>

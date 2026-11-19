@@ -100,10 +100,10 @@
 - [x] `PosPage` (kasir): cari/pilih barang, keranjang, input pembayaran, tombol checkout, tampilkan kembalian.
 - [x] Tampilkan error 409 dengan daftar barang yang stoknya kurang (mudah dibaca). Keranjang tidak dihapus saat gagal.
 - [x] Cegah klik ganda pada tombol checkout (disable saat request berjalan).
-- [ ] `CatalogPage` (anggota): katalog, keranjang, pesan online.
+- [x] `CatalogPage` (anggota): katalog, keranjang, pesan online.
 - [x] `OrdersPage` dan `ReceiptPage` (struk dapat dicetak dengan `window.print()`).
-- [ ] `AdminItemsPage` (tambah/ubah barang), `AdminStockPage` (restock, opname, riwayat mutasi).
-- [ ] `AdminReportPage` (laporan penjualan dengan filter tanggal).
+- [x] `AdminItemsPage` (tambah/ubah barang), `AdminStockPage` (restock, opname, riwayat mutasi).
+- [x] `AdminReportPage` (laporan penjualan dengan filter tanggal).
 - [ ] Verifikasi manual alur tiap role dari ujung ke ujung.
 
 ## Fase 9. Pengujian Konkurensi & Verifikasi
