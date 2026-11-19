@@ -87,10 +87,10 @@
 
 ## Fase 7. Laporan
 
-- [ ] Buat `ReportRepository` dengan query agregasi (`SUM`, `COUNT`, `GROUP BY`).
-- [ ] Buat `ReportService` (konversi batas tanggal Asia/Makassar ke UTC).
-- [ ] Implementasikan `GET /api/reports/sales?from&to` (ADMIN): total transaksi, total pendapatan, rincian per channel, barang terlaris.
-- [ ] Tes: periode kosong, periode berisi, validasi tanggal, akses non-admin.
+- [x] Buat `ReportRepository` dengan query agregasi (`SUM`, `COUNT`, `GROUP BY`).
+- [x] Buat `ReportService` (konversi batas tanggal Asia/Makassar ke UTC).
+- [x] Implementasikan `GET /api/reports/sales?from&to` (ADMIN): total transaksi, total pendapatan, rincian per channel, barang terlaris.
+- [x] Tes: periode kosong, periode berisi, validasi tanggal, akses non-admin.
 
 ## Fase 8. Frontend React
 
